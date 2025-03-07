@@ -64,10 +64,6 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <dataFile>target/jacoco.exec</dataFile>
-                    <outputDirectory>target/jacoco-ut</outputDirectory>
-                </configuration>
             </plugin>
         </plugins>
     </build>

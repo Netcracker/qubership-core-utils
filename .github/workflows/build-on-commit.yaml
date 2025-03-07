@@ -7,8 +7,9 @@ jobs:
     mvn:
         uses: netcracker/qubership-workflow-hub/.github/workflows/maven-publish.yml@main
         with:
-            maven-command: "--batch-mode deploy -Dgpg.skip=true"
+            maven-command: "--batch-mode deploy org.sonarsource.scanner.maven:sonar-maven-plugin:5.0.0.4389:sonar -Dgpg.skip=true -Dsonar.projectKey=Netcracker_qubership-core-utils -Dsonar.organization=netcracker"
             server-id: github
             java-version: 17
         secrets:
             maven-token: ${{ secrets.GITHUB_TOKEN }}
+            sonar-token: ${{ secrets.SONAR_TOKEN }}
