@@ -1,3 +1,9 @@
+![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Netcracker_qubership-core-utils&metric=coverage)
+![duplicated_lines_density](https://sonarcloud.io/api/project_badges/measure?project=Netcracker_qubership-core-utils&metric=duplicated_lines_density)
+![vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=TNetcracker_qubership-core-utils&metric=vulnerabilities)
+![bugs](https://sonarcloud.io/api/project_badges/measure?project=Netcracker_qubership-core-utils&metric=bugs)
+![code_smells](https://sonarcloud.io/api/project_badges/measure?project=Netcracker_qubership-core-utils&metric=code_smells)
+
 # Core Utils - TLS Utilities
 
 A lightweight Java library providing TLS (Transport Layer Security) configuration and authentication utilities for secure communications.
