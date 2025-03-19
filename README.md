@@ -1,8 +1,8 @@
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Netcracker_qubership-core-utils&metric=coverage)](https://sonarcloud.io/summary/overall?id=Netcracker_qubership-core-utils)
-[![duplicated_lines_density](https://sonarcloud.io/api/project_badges/measure?project=Netcracker_qubership-core-utils&metric=duplicated_lines_density)](https://sonarcloud.io/summary/overall?id=Netcracker_qubership-core-utils)
-[![vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=Netcracker_qubership-core-utils&metric=vulnerabilities)](https://sonarcloud.io/summary/overall?id=Netcracker_qubership-core-utils)
-[![bugs](https://sonarcloud.io/api/project_badges/measure?project=Netcracker_qubership-core-utils&metric=bugs)](https://sonarcloud.io/summary/overall?id=Netcracker_qubership-core-utils)
-[![code_smells](https://sonarcloud.io/api/project_badges/measure?project=Netcracker_qubership-core-utils&metric=code_smells)](https://sonarcloud.io/summary/overall?id=Netcracker_qubership-core-utils)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?metric=coverage&project=Netcracker_qubership-core-utils)](https://sonarcloud.io/summary/overall?id=Netcracker_qubership-core-utils)
+[![duplicated_lines_density](https://sonarcloud.io/api/project_badges/measure?metric=duplicated_lines_density&project=Netcracker_qubership-core-utils)](https://sonarcloud.io/summary/overall?id=Netcracker_qubership-core-utils)
+[![vulnerabilities](https://sonarcloud.io/api/project_badges/measure?metric=vulnerabilities&project=Netcracker_qubership-core-utils)](https://sonarcloud.io/summary/overall?id=Netcracker_qubership-core-utils)
+[![bugs](https://sonarcloud.io/api/project_badges/measure?metric=bugs&project=Netcracker_qubership-core-utils)](https://sonarcloud.io/summary/overall?id=Netcracker_qubership-core-utils)
+[![code_smells](https://sonarcloud.io/api/project_badges/measure?metric=code_smells&project=Netcracker_qubership-core-utils)](https://sonarcloud.io/summary/overall?id=Netcracker_qubership-core-utils)
 
 # Core Utils - TLS Utilities
 
