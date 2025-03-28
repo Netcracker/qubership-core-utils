@@ -18,7 +18,7 @@
     <modules>
         <module>tls</module>
     </modules>
-
+    
     <distributionManagement>
             <repository>
                 <id>github</id>
@@ -26,6 +26,12 @@
                 <url>https://maven.pkg.github.com/netcracker/qubership-core-utils</url>
             </repository>
     </distributionManagement>
+
+     <scm>
+        <connection>scm:git:git@github.com/Netcracker/qubership-core-utils.git</connection>
+        <developerConnection>scm:git:git@github.com/Netcracker/qubership-core-utils.git</developerConnection>
+        <url>https://github.com/Netcracker/qubership-core-utils.git</url>
+    </scm>
 
     <build>
         <plugins>
@@ -64,6 +70,16 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>3.1.1</version>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.18.0</version>
             </plugin>
         </plugins>
     </build>
