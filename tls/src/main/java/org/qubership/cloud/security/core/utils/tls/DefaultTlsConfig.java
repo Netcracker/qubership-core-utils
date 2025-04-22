@@ -5,7 +5,6 @@ import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509KeyManager;
 import javax.net.ssl.X509TrustManager;
 import java.security.KeyStore;
-import java.util.Arrays;
 
 public class DefaultTlsConfig implements TlsConfig {
     private final TrustManagerFactory trustManagerFactory;
@@ -35,7 +34,7 @@ public class DefaultTlsConfig implements TlsConfig {
 
     @Override
     public boolean isInternalTlsEnabled() {
-        throw new UnsupportedOperationException("Deprecated");
+        return false;
     }
 
     @Override
