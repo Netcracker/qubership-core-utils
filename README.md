@@ -49,7 +49,8 @@ The M2MManager interface provides a flexible way to handle machine-to-machine au
 ## Documentation
 
 - [Contributing Guide](CONTRIBUTING.md)
-- [Code of Conduct](CODE-OF-CONDUCT.md) 
+- [Code of Conduct](CODE-OF-CONDUCT.md)
+  
 - [Security Policy](SECURITY.md)
 
 ## License
