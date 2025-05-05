@@ -19,6 +19,14 @@
         <module>tls</module>
     </modules>
 
+    <scm>
+        <connection>scm:git:https://github.com/Netcracker/qubership-core-utils.git</connection>
+        <developerConnection>scm:git:https://github.com/Netcracker/qubership-core-utils.git
+        </developerConnection>
+        <url>https://github.com/Netcracker/qubership-core-utils</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <distributionManagement>
             <repository>
                 <id>github</id>
