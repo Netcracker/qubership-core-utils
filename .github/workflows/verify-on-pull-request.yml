@@ -10,3 +10,7 @@ jobs:
     with:
       maven-goal: verify
       java-version: 17
+      sonar-project-key: ${{ vars.SONAR_PROJECT_KEY }}
+    secrets:
+      maven-token: ${{ secrets.GITHUB_TOKEN }}
+      sonar-token: ${{ secrets.SONAR_TOKEN }}
