@@ -1,12 +1,11 @@
-name: Verify on pull requests
+name: Build on Push
 
 on:
-  pull_request:
-    types: [ opened, synchronize, reopened ]
+ - push
 
 jobs:
   mvn:
     uses: netcracker/qubership-core-infra/.github/workflows/run-maven-with-sonar.yaml@main
     with:
-      maven-goal: verify
+      maven-goal: deploy
       java-version: 17
