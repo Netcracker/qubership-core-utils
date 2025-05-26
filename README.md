@@ -57,3 +57,4 @@ The M2MManager interface provides a flexible way to handle machine-to-machine au
 ## License
 
 Apache License 2.0 - see [LICENSE](LICENSE)
+
