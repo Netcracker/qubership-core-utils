@@ -13,6 +13,12 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.qubership.cloud.security.core.utils</groupId>
+            <artifactId>test-utils</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.36</version>  <!-- Check for the latest version -->
@@ -23,6 +29,7 @@
             <artifactId>annotations</artifactId>
             <version>26.0.2</version>
         </dependency>
+
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
