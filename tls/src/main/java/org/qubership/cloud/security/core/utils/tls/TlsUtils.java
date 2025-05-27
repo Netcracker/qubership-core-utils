@@ -9,7 +9,7 @@ import java.security.KeyStore;
 import java.util.Comparator;
 import java.util.ServiceLoader;
 
-@SuppressWarnings("unused")
+@SuppressWarnings("UnusedReturnValue")
 public class TlsUtils {
     private static TlsConfig INSTANCE = getTlsConfig();
 
@@ -27,12 +27,16 @@ public class TlsUtils {
         return tlsConfig;
     }
 
-    @Deprecated() //FOR TESTING ONLY
+    /**
+     * FOR TESTING PURPOSES ONLY
+     */
     static void setTlsConfigForTesting(TlsConfig config) {
         INSTANCE = config;
     }
 
-    @Deprecated() //FOR TESTING ONLY
+    /**
+     * FOR TESTING PURPOSES ONLY
+     */
     static void restoreTlsConfigForTesting() {
         INSTANCE = getTlsConfig();
     }
