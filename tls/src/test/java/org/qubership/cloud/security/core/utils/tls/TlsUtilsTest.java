@@ -1,17 +1,36 @@
 package org.qubership.cloud.security.core.utils.tls;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import javax.net.ssl.SSLContext;
 import java.security.KeyStore;
+import java.util.ServiceLoader;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class TlsUtilsTest {
+
+    @Test
+    void testServiceLoaderFromCurrentThreadContextClassLoader() {
+        ServiceLoader<TlsConfig> serviceLoader = ServiceLoader.load(TlsConfig.class);
+
+        assertNotNull(serviceLoader);
+
+        int count = 0;
+        for (TlsConfig service : serviceLoader) {
+            assertNotNull(service, "Failed to load service.");
+            count++;
+        }
+
+        assertEquals(2, count, "Failed to load all services.");
+
+        Assertions.assertNotNull(TlsUtils.getSslContext());
+    }
 
     @Test
     void testIsInternalTlsEnabled() {
@@ -77,7 +96,7 @@ class TlsUtilsTest {
     void testSelectUrl() {
         String httpUrl = "http://example.com";
         String httpsUrl = "https://example.com";
-        
+
         assertEquals(httpsUrl, TlsUtils.selectUrl(httpUrl, httpsUrl));
     }
 
@@ -88,7 +107,7 @@ class TlsUtilsTest {
         String keyPassword = "password";
 
         SSLContext result = TlsUtils.createSSLContext(trustStore, keyStore, keyPassword);
-        
+
         assertNotNull(result);
     }
-} 
+}
