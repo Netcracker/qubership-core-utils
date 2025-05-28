@@ -17,7 +17,6 @@
 
     <modules>
         <module>tls</module>
-        <module>test-utils</module>
     </modules>
 
     <scm>

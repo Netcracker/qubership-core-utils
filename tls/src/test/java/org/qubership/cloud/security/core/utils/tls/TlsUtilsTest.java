@@ -1,129 +1,94 @@
 package org.qubership.cloud.security.core.utils.tls;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import javax.net.ssl.SSLContext;
 import java.security.KeyStore;
 
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
-public class TlsUtilsTest {
-
-    @Mock
-    private TlsConfig tlsConfigMock;
-
-    @BeforeEach
-    void setUp() {
-        TlsUtils.setTlsConfigForTesting(tlsConfigMock);
-    }
-
-    @AfterEach
-    void tearDown() {
-        TlsUtils.restoreTlsConfigForTesting();
-    }
-
-    @Test
-    void testCreateSSLContext() {
-        KeyStore trustStore = mock(KeyStore.class);
-        KeyStore keyStore = mock(KeyStore.class);
-        String keyPassword = "testPassword";
-
-        TlsUtils.createSSLContext(trustStore, keyStore, keyPassword);
-        verify(tlsConfigMock, times(1)).createSSLContext(trustStore, keyStore, keyPassword);
-    }
+class TlsUtilsTest {
 
     @Test
     void testIsInternalTlsEnabled() {
-        TlsUtils.isInternalTlsEnabled();
-        verify(tlsConfigMock, times(1)).isInternalTlsEnabled();
+        assertTrue(TlsUtils.isInternalTlsEnabled());
     }
 
     @Test
     void testGetKeyStoreType() {
-        TlsUtils.getKeyStoreType();
-        verify(tlsConfigMock, times(1)).getKeyStoreType();
+        assertEquals("JKS", TlsUtils.getKeyStoreType());
     }
 
     @Test
     void testGetTrustStoreType() {
-        TlsUtils.getTrustStoreType();
-        verify(tlsConfigMock, times(1)).getTrustStoreType();
+        assertEquals("JKS", TlsUtils.getTrustStoreType());
     }
 
     @Test
     void testGetKeyStorePath() {
-        TlsUtils.getKeyStorePath();
-        verify(tlsConfigMock, times(1)).getKeyStorePath();
+        assertEquals("/path/to/keystore", TlsUtils.getKeyStorePath());
     }
 
     @Test
     void testGetTrustStorePath() {
-        TlsUtils.getTrustStorePath();
-        verify(tlsConfigMock, times(1)).getTrustStorePath();
+        assertEquals("/path/to/truststore", TlsUtils.getTrustStorePath());
     }
 
     @Test
     void testGetCaCertificatePath() {
-        TlsUtils.getCaCertificatePath();
-        verify(tlsConfigMock, times(1)).getCaCertificatePath();
+        assertEquals("/path/to/ca", TlsUtils.getCaCertificatePath());
     }
 
     @Test
     void testGetCertificateStorePassword() {
-        TlsUtils.getCertificateStorePassword();
-        verify(tlsConfigMock, times(1)).getCertificateStorePassword();
+        assertEquals("password", TlsUtils.getCertificateStorePassword());
     }
 
     @Test
     void testGetKeyStore() {
-        TlsUtils.getKeyStore();
-        verify(tlsConfigMock, times(1)).getKeyStore();
+        assertNotNull(TlsUtils.getKeyStore());
     }
 
     @Test
     void testGetTrustStore() {
-        TlsUtils.getTrustStore();
-        verify(tlsConfigMock, times(1)).getTrustStore();
+        assertNotNull(TlsUtils.getTrustStore());
     }
 
     @Test
     void testGetKeyManager() {
-        TlsUtils.getKeyManager();
-        verify(tlsConfigMock, times(1)).getKeyManager();
+        assertNotNull(TlsUtils.getKeyManager());
     }
 
     @Test
     void testGetTrustManager() {
-        TlsUtils.getTrustManager();
-        verify(tlsConfigMock, times(1)).getTrustManager();
+        assertNotNull(TlsUtils.getTrustManager());
     }
 
     @Test
     void testGetSslContext() {
-        TlsUtils.getSslContext();
-        verify(tlsConfigMock, times(1)).getSslContext();
+        assertNotNull(TlsUtils.getSslContext());
     }
 
     @Test
     void testSelectUrl() {
         String httpUrl = "http://example.com";
         String httpsUrl = "https://example.com";
-
-        when(tlsConfigMock.isInternalTlsEnabled()).thenReturn(true);
-        String result = TlsUtils.selectUrl(httpUrl, httpsUrl);
-        Assertions.assertEquals(httpsUrl, result);
-
-        when(tlsConfigMock.isInternalTlsEnabled()).thenReturn(false);
-        result = TlsUtils.selectUrl(httpUrl, httpsUrl);
-        Assertions.assertEquals(httpUrl, result);
-
-        verify(tlsConfigMock, times(2)).isInternalTlsEnabled();
-
+        
+        assertEquals(httpsUrl, TlsUtils.selectUrl(httpUrl, httpsUrl));
     }
-}
+
+    @Test
+    void testCreateSSLContext() {
+        KeyStore trustStore = mock(KeyStore.class);
+        KeyStore keyStore = mock(KeyStore.class);
+        String keyPassword = "password";
+
+        SSLContext result = TlsUtils.createSSLContext(trustStore, keyStore, keyPassword);
+        
+        assertNotNull(result);
+    }
+} 

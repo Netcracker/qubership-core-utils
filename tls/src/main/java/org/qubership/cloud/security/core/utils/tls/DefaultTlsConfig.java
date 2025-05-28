@@ -1,7 +1,5 @@
 package org.qubership.cloud.security.core.utils.tls;
 
-import org.qubership.cloud.test.ExcludeFromJacocoGeneratedReport;
-
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509KeyManager;
@@ -25,13 +23,11 @@ public class DefaultTlsConfig implements TlsConfig {
     }
 
     @Override
-    @ExcludeFromJacocoGeneratedReport
     public void load() {
         // all were loaded in constructor
     }
 
     @Override
-    @ExcludeFromJacocoGeneratedReport
     public SSLContext createSSLContext(KeyStore trustStore, KeyStore keyStore, String keyPassword) {
         throw new UnsupportedOperationException("Deprecated");
     }
@@ -42,55 +38,46 @@ public class DefaultTlsConfig implements TlsConfig {
     }
 
     @Override
-    @ExcludeFromJacocoGeneratedReport
     public String getKeyStoreType() {
         throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
-    @ExcludeFromJacocoGeneratedReport
     public String getTrustStoreType() {
         throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
-    @ExcludeFromJacocoGeneratedReport
     public String getKeyStorePath() {
         throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
-    @ExcludeFromJacocoGeneratedReport
     public String getTrustStorePath() {
         throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
-    @ExcludeFromJacocoGeneratedReport
     public String getCaCertificatePath() {
         throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
-    @ExcludeFromJacocoGeneratedReport
     public String getCertificateStorePassword() {
         throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
-    @ExcludeFromJacocoGeneratedReport
     public KeyStore getKeyStore() {
         throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
-    @ExcludeFromJacocoGeneratedReport
     public KeyStore getTrustStore() {
         throw new UnsupportedOperationException("Deprecated");
     }
 
     @Override
-    @ExcludeFromJacocoGeneratedReport
     public X509KeyManager getKeyManager() {
         throw new UnsupportedOperationException("Deprecated");
     }

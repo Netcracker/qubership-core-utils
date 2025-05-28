@@ -27,20 +27,6 @@ public class TlsUtils {
         return tlsConfig;
     }
 
-    /**
-     * FOR TESTING PURPOSES ONLY
-     */
-    static void setTlsConfigForTesting(TlsConfig config) {
-        INSTANCE = config;
-    }
-
-    /**
-     * FOR TESTING PURPOSES ONLY
-     */
-    static void restoreTlsConfigForTesting() {
-        INSTANCE = getTlsConfig();
-    }
-
     public static SSLContext createSSLContext(KeyStore trustStore, KeyStore keyStore, String keyPassword) {
         return INSTANCE.createSSLContext(trustStore, keyStore, keyPassword);
     }
