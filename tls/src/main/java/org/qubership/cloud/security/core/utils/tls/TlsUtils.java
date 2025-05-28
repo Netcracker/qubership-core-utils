@@ -11,7 +11,7 @@ import java.util.ServiceLoader;
 
 @SuppressWarnings("UnusedReturnValue")
 public class TlsUtils {
-    private static TlsConfig INSTANCE = getTlsConfig();
+    private static final TlsConfig INSTANCE = getTlsConfig();
 
     @NotNull
     private static TlsConfig getTlsConfig() {
