@@ -9,6 +9,7 @@ import java.security.KeyStore;
 import java.util.Comparator;
 import java.util.ServiceLoader;
 
+@SuppressWarnings("UnusedReturnValue")
 public class TlsUtils {
     private final static TlsConfig INSTANCE = getTlsConfig();
 

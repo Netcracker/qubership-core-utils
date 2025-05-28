@@ -1,5 +1,7 @@
 package org.qubership.cloud.security.core.utils.tls;
 
+
+@SuppressWarnings("unused")
 public class TlsInitializationException extends RuntimeException {
     public TlsInitializationException() {
         super();
