@@ -12,7 +12,7 @@
     <artifactId>tls-utils</artifactId>
 
     <properties>
-        <mockito.version>5.14.2</mockito.version>
+        <mockito.version>5.18.0</mockito.version>
         <sonar.coverage.exclusions>
             **/TlsInitializationException.java
         </sonar.coverage.exclusions>
