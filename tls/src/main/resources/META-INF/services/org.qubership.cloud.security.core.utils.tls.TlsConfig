@@ -1,1 +1,1 @@
-org.qubership.cloud.security.core.utils.tls.DefaultTlsConfig
+com.netcracker.cloud.security.core.utils.tls.DefaultTlsConfig

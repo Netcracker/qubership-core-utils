@@ -1,1 +1,1 @@
-org.qubership.cloud.security.core.auth.DummyM2MManager
+com.netcracker.cloud.security.core.auth.DummyM2MManager

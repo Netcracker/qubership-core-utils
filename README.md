@@ -32,7 +32,7 @@ Add the dependency to your Maven project:
 
 ```xml
 <dependency>
-    <groupId>org.qubership.cloud.security.core.utils</groupId>
+    <groupId>com.netcracker.cloud.security.core.utils</groupId>
     <artifactId>tls-utils</artifactId>
     <version>2.0.0-SNAPSHOT</version>
 </dependency>
