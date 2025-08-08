@@ -1,4 +1,4 @@
-package org.qubership.cloud.security.core.utils.tls;
+package com.netcracker.cloud.security.core.utils.tls;
 
 import org.jetbrains.annotations.NotNull;
 

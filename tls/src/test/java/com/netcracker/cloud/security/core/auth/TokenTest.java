@@ -1,4 +1,4 @@
-package org.qubership.cloud.security.core.auth;
+package com.netcracker.cloud.security.core.auth;
 
 import org.junit.jupiter.api.Test;
 

@@ -1,4 +1,4 @@
-package org.qubership.cloud.security.core.utils.tls;
+package com.netcracker.cloud.security.core.utils.tls;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.X509KeyManager;
