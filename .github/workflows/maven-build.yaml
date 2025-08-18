@@ -34,11 +34,11 @@ jobs:
           PROJECT_KEY="${{ vars.SONAR_PROJECT_KEY }}_${BRANCH_SAFE}"
 
           # Check if project exists
-          EXISTS=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/projects/search?projects=$PROJECT_KEY" | jq -r '.components | length')
+          EXISTS=$(curl -s -u $SONAR_TOKEN: "https://sonarcloud.io/api/projects/search?projects=$PROJECT_KEY" | jq -r '.components | length')
 
           if [ "$EXISTS" -eq 0 ]; then
             echo "Creating SonarQube project $PROJECT_KEY"
-            curl -s -X POST -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/projects/create?name=$PROJECT_KEY&project=$PROJECT_KEY"
+            curl -s -X POST -u $SONAR_TOKEN: "https://sonarcloud.io/api/projects/create?name=$PROJECT_KEY&project=$PROJECT_KEY"
           else
             echo "Project $PROJECT_KEY already exists"
           fi
@@ -49,5 +49,5 @@ jobs:
           args: >
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}_${{ env.BRANCH_SAFE }}
             -Dsonar.projectName="${{ vars.SONAR_PROJECT_KEY }}/${{ env.BRANCH_SAFE }}"
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+            -Dsonar.host.url=https://sonarcloud.io
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
