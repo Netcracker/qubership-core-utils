@@ -9,6 +9,6 @@ jobs:
     with:
       event-name: ${{ github.event_name }}
       actor: ${{ github.actor }}
-      sonar-project-key: ${{ vars.SONAR_PROJECT_KEY }}_${{ github.ref_name }}
+      sonar-project-key: ${{ vars.SONAR_PROJECT_KEY }}_branching
     secrets:
       sonar-token: ${{ secrets.SONAR_TOKEN }}
