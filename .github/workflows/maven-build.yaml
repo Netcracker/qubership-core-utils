@@ -1,14 +1,53 @@
-name: Maven build
+name: SonarQube Dynamic Branch Scan
 
 on:
   push:
+    branches:
+      - '**'
+    tags-ignore:
+      - '**'
 
 jobs:
-  mvn:
-    uses: netcracker/qubership-core-infra/.github/workflows/maven-build-with-sonar.yaml@v1.0.8
-    with:
-      event-name: ${{ github.event_name }}
-      actor: ${{ github.actor }}
-      sonar-project-key: ${{ vars.SONAR_PROJECT_KEY }}_branching
-    secrets:
-      sonar-token: ${{ secrets.SONAR_TOKEN }}
+  sonarqube:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Sanitize branch name
+        run: |
+          echo "BRANCH_SAFE=${GITHUB_REF_NAME//\//_}" >> $GITHUB_ENV
+
+      - name: Create SonarQube Project if missing
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          PROJECT_KEY="${{ vars.SONAR_PROJECT_KEY }}_${BRANCH_SAFE}"
+
+          # Check if project exists
+          EXISTS=$(curl -s -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/projects/search?projects=$PROJECT_KEY" | jq -r '.components | length')
+
+          if [ "$EXISTS" -eq 0 ]; then
+            echo "Creating SonarQube project $PROJECT_KEY"
+            curl -s -X POST -u $SONAR_TOKEN: "$SONAR_HOST_URL/api/projects/create?name=$PROJECT_KEY&project=$PROJECT_KEY"
+          else
+            echo "Project $PROJECT_KEY already exists"
+          fi
+
+      - name: Run SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v2
+        with:
+          args: >
+            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}_${{ env.BRANCH_SAFE }}
+            -Dsonar.projectName="${{ vars.SONAR_PROJECT_KEY }}/${{ env.BRANCH_SAFE }}"
+            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
