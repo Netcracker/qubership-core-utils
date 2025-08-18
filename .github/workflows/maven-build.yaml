@@ -2,8 +2,6 @@ name: Maven build
 
 on:
   push:
-  pull_request:
-    types: [ opened, synchronize, reopened ]
 
 jobs:
   mvn:
@@ -11,6 +9,6 @@ jobs:
     with:
       event-name: ${{ github.event_name }}
       actor: ${{ github.actor }}
-      sonar-project-key: ${{ vars.SONAR_PROJECT_KEY }}
+      sonar-project-key: ${{ vars.SONAR_PROJECT_KEY }}_${{ github.ref_name }}
     secrets:
       sonar-token: ${{ secrets.SONAR_TOKEN }}
