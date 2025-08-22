@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class TokenTest {
+class TokenTest {
     @Test
-    public void testDummyToken() {
+    void testDummyToken() {
         assertNotNull(Token.DUMMY_TOKEN);
     }
 }
