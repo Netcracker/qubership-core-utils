@@ -38,6 +38,7 @@ public class TestTlsConfig implements TlsConfig {
 
     @Override
     public void load() {
+        //do nothing
     }
 
     @Override
