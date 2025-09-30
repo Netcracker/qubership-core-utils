@@ -13,9 +13,6 @@
 
     <properties>
         <mockito.version>5.17.0</mockito.version>
-        <sonar.coverage.exclusions>
-            **/TlsInitializationException.java
-        </sonar.coverage.exclusions>
     </properties>
 
     <dependencies>
