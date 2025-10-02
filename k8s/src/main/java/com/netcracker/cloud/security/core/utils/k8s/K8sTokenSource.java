@@ -10,8 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class K8sTokenSource {
     private static final String defaultTokenDir = "/var/run/secrets/tokens";
+    private static final Object lock = new Object();
 
-    private static final Map<String, FileTokenSource> tokenSources = new ConcurrentHashMap<>();
+    static final Map<String, FileTokenSource> tokenSources = new ConcurrentHashMap<>();
 
     public static String getToken(String audience) throws IOException {
         FileTokenSource tokenSource = tokenSources.get(audience);
@@ -21,19 +22,33 @@ public class K8sTokenSource {
         return createTokenSource(defaultTokenDir, audience).getToken();
     }
 
-    static FileTokenSource createTokenSource(String tokenDir, String audience) throws IOException {
-        FileTokenSource tokenSource = new FileTokenSource(Path.of(tokenDir, audience));
-        tokenSources.put(audience, tokenSource);
-        return tokenSource;
+    public static TokenSource getTokenSource(String audience) throws IOException {
+        FileTokenSource tokenSource = tokenSources.get(audience);
+        if (tokenSource != null) {
+            return tokenSource;
+        }
+        return createTokenSource(defaultTokenDir, audience);
     }
 
-    public void close() {
+    static FileTokenSource createTokenSource(String tokenDir, String audience) throws IOException {
+        synchronized (lock) {
+            FileTokenSource tokenSource = tokenSources.get(audience);
+            if (tokenSource != null) {
+                return tokenSource;
+            }
+            tokenSource = new FileTokenSource(Path.of(tokenDir, audience));
+            tokenSources.put(audience, tokenSource);
+            return tokenSource;
+        }
+    }
+
+    public static void close() {
         for (Map.Entry<String, FileTokenSource> entry : tokenSources.entrySet()) {
             entry.getValue().close();
         }
     }
 
-    static class FileTokenSource {
+    private static class FileTokenSource implements TokenSource {
         static final String tokenFileLinkName = "..data";
         static final String tokenFileName = "token";
         private final Object lock = new Object();
@@ -67,7 +82,7 @@ public class K8sTokenSource {
             }
         }
 
-        private String getToken() throws IOException {
+        public String getToken() throws IOException {
             synchronized (lock) {
                 if (tokenRefreshException != null) {
                     throw tokenRefreshException;
