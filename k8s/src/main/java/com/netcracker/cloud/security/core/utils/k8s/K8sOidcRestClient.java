@@ -1,62 +1,76 @@
 package com.netcracker.cloud.security.core.utils.k8s;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Call;
-import okhttp3.OkHttpClient;
-import okhttp3.OkHttpClient.Builder;
-import okhttp3.Request;
-import okhttp3.Response;
+import net.jodah.failsafe.Failsafe;
+import net.jodah.failsafe.RetryPolicy;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 @Slf4j
 public class K8sOidcRestClient {
-    private final OkHttpClient client;
-    private final K8sTokenInterceptor k8sTokenInterceptor;
-    @Getter
-    String jwtIssuer;
+    private static final int retryPolicyBackoffMaxAttempts = 5;
+    private static final Duration retryPolicyBackoffDelay = Duration.ofMillis(500);
+    private static final Duration retryPolicyBackoffMaxDelay = Duration.ofSeconds(15);
+    private static final Duration retryPolicyJitter = Duration.ofMillis(100);
 
-    public K8sOidcRestClient(TokenSource tokenSource, String jwtIssuer) throws IOException {
-        Builder builder = new OkHttpClient.Builder();
+    private final RetryPolicy<HttpResponse<String>> retryPolicy;
+    private final HttpClient client;
+    private final TokenSource tokenSource;
 
-        k8sTokenInterceptor = new K8sTokenInterceptor(tokenSource);
-        this.jwtIssuer = jwtIssuer;
-        builder.addInterceptor(k8sTokenInterceptor);
-
-        client = builder.build();
+    public K8sOidcRestClient(TokenSource tokenSource) {
+        this.retryPolicy = new RetryPolicy<HttpResponse<String>>()
+                .withMaxRetries(retryPolicyBackoffMaxAttempts)
+                .withBackoff(retryPolicyBackoffDelay.toMillis(), retryPolicyBackoffMaxDelay.toMillis(), ChronoUnit.MILLIS)
+                .withJitter(retryPolicyJitter)
+                .handleResultIf(res-> res.statusCode()/100 == 5);
+        this.client = HttpClient.newHttpClient();
+        this.tokenSource = tokenSource;
     }
 
-    public OidcConfig getOidcConfiguration() throws RuntimeException {
-        Request request = new Request.Builder()
-                .url(jwtIssuer + "/.well-known/openid-configuration")
-                .build();
-
-        Call call = client.newCall(request);
-        try (Response response = call.execute()) {
+    public OidcConfig getOidcConfiguration(String issuer) {
+        try {
+            HttpRequest request = newRequestWithAuth()
+                    .uri(new URI(issuer + "/.well-known/openid-configuration"))
+                    .GET()
+                    .build();
+            HttpResponse<String> response = Failsafe.with(retryPolicy).get(() -> this.client.send(request, HttpResponse.BodyHandlers.ofString()));
+            checkResponse(response);
             ObjectMapper objectMapper = new ObjectMapper();
-            if (response.body() == null) {
-                throw new RuntimeException("Response for requesting oidc configuration from Kubernetes IDP does not have response body");
-            }
-            return objectMapper.readValue(response.body().string(), OidcConfig.class);
-        } catch (IOException e) {
-            log.error("Failed to retrieve OIDC configuration from Kubernetes IDP", e);
-            throw new RuntimeException(e);
+            return objectMapper.readValue(response.body(), OidcConfig.class);
+        } catch (URISyntaxException | IOException e) {
+            throw new RuntimeException("Failed to get OIDC configuration with issuer %s from Kubernetes".formatted(issuer), e);
         }
     }
 
-    public String getJwks(String jwksEndpoint) throws IOException {
-        Request request = new Request.Builder()
-                .url(jwksEndpoint)
-                .build();
+    public String getJwks(String jwksEndpoint) {
+        try {
+            HttpRequest request = newRequestWithAuth()
+                    .uri(new URI(jwksEndpoint))
+                    .build();
+            HttpResponse<String> response = Failsafe.with(retryPolicy).get(() -> this.client.send(request, HttpResponse.BodyHandlers.ofString()));
+            checkResponse(response);
+            return response.body();
+        } catch (URISyntaxException | IOException | RuntimeException e) {
+            throw new RuntimeException("Failed to get jwks with jwks endpoint %s from Kubernetes with jwks".formatted(jwksEndpoint), e);
+        }
+    }
 
-        Call call = client.newCall(request);
-        try (Response response = call.execute()) {
-            if (response.body() == null) {
-                throw new RuntimeException("Response for requesting jwks from Kubernetes IDP does not have response body");
-            }
-            return response.body().string();
+    private HttpRequest.Builder newRequestWithAuth() throws IOException {
+        return HttpRequest.newBuilder().setHeader("Authorization", tokenSource.getToken());
+    }
+
+    private void checkResponse(HttpResponse<String> response) {
+        if (response.statusCode() != 200 || StringUtils.isEmpty(response.body())) {
+            throw new RuntimeException("empty response body");
         }
     }
 }

@@ -10,6 +10,6 @@ public class K8sTokenVerificationException extends Exception {
     }
 
     public K8sTokenVerificationException(Throwable e) {
-        super(msg, e);
+        super(e);
     }
 }
