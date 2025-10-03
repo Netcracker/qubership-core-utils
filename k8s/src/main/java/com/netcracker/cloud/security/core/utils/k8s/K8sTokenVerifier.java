@@ -21,31 +21,30 @@ public class K8sTokenVerifier {
     private static final String oidcTokenAud = "oidc-token";
 
     private final Object lock = new Object();
-    private final String jwksEndpoint;
-    private final K8sOidcRestClient k8sOidcRestClient;
-    private final JwtConsumer jwtClaimsParser;
+    private String jwksEndpoint;
+    private K8sOidcRestClient restClient;
+    private JwtConsumer jwtClaimsParser;
     private List<JsonWebKey> jwksCache;
 
     public K8sTokenVerifier(String jwtAudience) {
         try {
             TokenSource tokenSource = K8sTokenSource.createTokenSource(oidcTokenAud);
-            this.k8sOidcRestClient = new K8sOidcRestClient(tokenSource);
-
             String issuer = this.getIssuerFromJwt(tokenSource.getToken());
-            this.jwtClaimsParser = new JwtConsumerBuilder()
-                    .setRequireExpirationTime()
-                    .setAllowedClockSkewInSeconds(30)
-                    .setRequireSubject()
-                    .setExpectedIssuer(issuer)
-                    .setExpectedAudience(jwtAudience)
-                    .setSkipSignatureVerification()
-                    .build();
-            this.jwksEndpoint = k8sOidcRestClient.getOidcConfiguration(issuer).getJwks_uri();
-
-            refreshJwksCache();
+            initialize(new K8sOidcRestClient(tokenSource), jwtAudience, issuer);
         } catch (IOException | RuntimeException e) {
             throw new RuntimeException("failed to create k8s token verifier (possibly projected volume token misconfigured in k8s deployment)", e);
         }
+    }
+
+    K8sTokenVerifier(K8sOidcRestClient restClient, String audience, String issuer) {
+        initialize(restClient, audience, issuer);
+    }
+
+    private void initialize(K8sOidcRestClient restClient, String jwtAudience, String issuer) {
+        this.restClient = restClient;
+        this.jwtClaimsParser = getJwtClaimsParser(issuer, jwtAudience);
+        this.jwksEndpoint = restClient.getOidcConfiguration(issuer).getJwks_uri();
+        refreshJwksCache();
     }
 
     public JwtClaims verify(String token) throws K8sTokenVerificationException {
@@ -79,7 +78,7 @@ public class K8sTokenVerifier {
 
     private void refreshJwksCache() {
         try {
-            String rawJwks = k8sOidcRestClient.getJwks(jwksEndpoint);
+            String rawJwks = restClient.getJwks(jwksEndpoint);
             jwksCache = new JsonWebKeySet(rawJwks).getJsonWebKeys();
         } catch (TimeoutExceededException | JoseException e) {
             String msg = "Getting Json web keys from kubernetes jwks endpoint %s failed".formatted(jwksEndpoint);
@@ -127,5 +126,16 @@ public class K8sTokenVerifier {
         } catch (InvalidJwtException | MalformedClaimException e) {
             throw new RuntimeException("failed to get issuer from k8s projected volume token", e);
         }
+    }
+
+    private JwtConsumer getJwtClaimsParser(String issuer, String audience) {
+        return new JwtConsumerBuilder()
+                .setRequireExpirationTime()
+                .setAllowedClockSkewInSeconds(30)
+                .setRequireSubject()
+                .setExpectedIssuer(issuer)
+                .setExpectedAudience(audience)
+                .setSkipSignatureVerification()
+                .build();
     }
 }
