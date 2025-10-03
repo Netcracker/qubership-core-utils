@@ -15,22 +15,14 @@ public class K8sTokenSource {
     static final Map<String, FileTokenSource> tokenSources = new ConcurrentHashMap<>();
 
     public static String getToken(String audience) throws IOException {
-        FileTokenSource tokenSource = tokenSources.get(audience);
-        if (tokenSource != null) {
-            return tokenSource.getToken();
-        }
-        return createTokenSource(defaultTokenDir, audience).getToken();
+        return createTokenSource(audience).getToken();
     }
 
-    public static TokenSource getTokenSource(String audience) throws IOException {
-        FileTokenSource tokenSource = tokenSources.get(audience);
-        if (tokenSource != null) {
-            return tokenSource;
-        }
-        return createTokenSource(defaultTokenDir, audience);
+    static FileTokenSource createTokenSource(String audience) throws IOException {
+        return createTokenSourceWithDir(defaultTokenDir, audience);
     }
 
-    static FileTokenSource createTokenSource(String tokenDir, String audience) throws IOException {
+    static FileTokenSource createTokenSourceWithDir(String tokenDir, String audience) throws IOException {
         synchronized (lock) {
             FileTokenSource tokenSource = tokenSources.get(audience);
             if (tokenSource != null) {
@@ -78,7 +70,7 @@ public class K8sTokenSource {
                     tokenRefreshException = e;
                 }
             } catch (InterruptedException e) {
-                log.error("K8sTokenWatcher listening thread interrupted. Stopping FileTokenSource", e);
+                log.error("K8sTokenWatcher listening thread interrupted. Stopping FileTokenSource in dir: %s".formatted(tokenDir), e);
             }
         }
 

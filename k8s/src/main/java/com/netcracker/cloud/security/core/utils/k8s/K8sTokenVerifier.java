@@ -18,15 +18,19 @@ import java.util.List;
 
 @Slf4j
 public class K8sTokenVerifier {
+    private static final String oidcTokenAud = "oidc-token";
+
     private final Object lock = new Object();
     private final String jwksEndpoint;
     private final K8sOidcRestClient k8sOidcRestClient;
     private final JwtConsumer jwtClaimsParser;
     private List<JsonWebKey> jwksCache;
 
-    public K8sTokenVerifier(K8sOidcRestClient k8sOidcRestClient, TokenSource tokenSource, String jwtAudience) {
-        this.k8sOidcRestClient = k8sOidcRestClient;
+    public K8sTokenVerifier(String jwtAudience) {
         try {
+            TokenSource tokenSource = K8sTokenSource.createTokenSource(oidcTokenAud);
+            this.k8sOidcRestClient = new K8sOidcRestClient(tokenSource);
+
             String issuer = this.getIssuerFromJwt(tokenSource.getToken());
             this.jwtClaimsParser = new JwtConsumerBuilder()
                     .setRequireExpirationTime()
@@ -37,6 +41,7 @@ public class K8sTokenVerifier {
                     .setSkipSignatureVerification()
                     .build();
             this.jwksEndpoint = k8sOidcRestClient.getOidcConfiguration(issuer).getJwks_uri();
+
             refreshJwksCache();
         } catch (IOException | RuntimeException e) {
             throw new RuntimeException("failed to create k8s token verifier (possibly projected volume token misconfigured in k8s deployment)", e);

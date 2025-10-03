@@ -40,7 +40,7 @@ class K8sTokenSourceTest {
 
     @Test
     void createTokenSource() throws IOException {
-        K8sTokenSource.createTokenSource(tempTokensDir.toString(), audience);
+        K8sTokenSource.createTokenSourceWithDir(tempTokensDir.toString(), audience);
 
         Failsafe.with(TOKEN_CACHE_UPDATED_RETRY_POLICY).run(() -> {
             assertEquals(oldToken, K8sTokenSource.getToken(audience));
