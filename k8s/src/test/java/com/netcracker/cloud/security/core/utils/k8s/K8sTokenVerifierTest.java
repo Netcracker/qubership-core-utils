@@ -30,7 +30,7 @@ class K8sTokenVerifierTest {
         when(restClient.getOidcConfiguration(jwtUtils.getJwtIssuer())).thenReturn(new OidcConfig(jwtUtils.getJwksEndpoint()));
         when(restClient.getJwks(jwtUtils.getJwksEndpoint())).thenReturn(jwtUtils.getJwks());
 
-        verifier = new K8sTokenVerifier(restClient, jwtUtils.getDbaasJwtAudience(), jwtUtils.getJwtIssuer());
+        verifier = new K8sTokenVerifier(restClient, jwtUtils.getDbaasJwtAudience(), jwtUtils.getDefaultClaimsJwt("test-namespace"));
     }
 
     @AfterEach

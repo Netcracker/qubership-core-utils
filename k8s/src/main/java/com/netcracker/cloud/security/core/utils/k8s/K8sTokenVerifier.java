@@ -29,19 +29,19 @@ public class K8sTokenVerifier {
     public K8sTokenVerifier(String jwtAudience) {
         try {
             TokenSource tokenSource = K8sTokenSource.createTokenSource(oidcTokenAud);
-            String issuer = this.getIssuerFromJwt(tokenSource.getToken());
-            initialize(new K8sOidcRestClient(tokenSource), jwtAudience, issuer);
+            initialize(new K8sOidcRestClient(tokenSource), jwtAudience, tokenSource.getToken());
         } catch (IOException | RuntimeException e) {
             throw new RuntimeException("failed to create k8s token verifier (possibly projected volume token misconfigured in k8s deployment)", e);
         }
     }
 
-    K8sTokenVerifier(K8sOidcRestClient restClient, String audience, String issuer) {
-        initialize(restClient, audience, issuer);
+    K8sTokenVerifier(K8sOidcRestClient restClient, String audience, String oidcToken) {
+        initialize(restClient, audience, oidcToken);
     }
 
-    private void initialize(K8sOidcRestClient restClient, String jwtAudience, String issuer) {
+    private void initialize(K8sOidcRestClient restClient, String jwtAudience, String oidcToken) {
         this.restClient = restClient;
+        String issuer = this.getIssuerFromJwt(oidcToken);
         this.jwtClaimsParser = getJwtClaimsParser(issuer, jwtAudience);
         this.jwksEndpoint = restClient.getOidcConfiguration(issuer).getJwks_uri();
         refreshJwksCache();
