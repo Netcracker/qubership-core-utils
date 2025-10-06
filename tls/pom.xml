@@ -26,6 +26,7 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>24.1.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -47,5 +48,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 </project>

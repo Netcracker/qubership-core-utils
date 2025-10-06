@@ -16,58 +16,48 @@ import java.io.IOException;
 
 @ExtendWith(MockitoExtension.class)
 class K8sOidcRestClientTest {
-    private static final String mockOidcConfig = "{\"issuer\":\"https://kubernetes.default.svc.cluster.local\","
-            + "\"jwks_uri\":\"https://192.168.49.2:8443/openid/v1/jwks\","
-            + "\"response_types_supported\":[\"id_token\"],"
-            + "\"subject_types_supported\":[\"public\"],"
-            + "\"id_token_signing_alg_values_supported\":[\"RS256\"]}";
-
     private String mockJwks;
     private K8sOidcRestClient restClient;
-    @Mock
-    TokenSource tokenSource;
 
     @BeforeEach
     void setUp() throws IOException, JoseException {
         TestJwtUtils jwtUtils = new TestJwtUtils();
         mockJwks = jwtUtils.getJwks();
         String validToken = jwtUtils.getDefaultClaimsJwt("test-namespace");
-        restClient = new K8sOidcRestClient(tokenSource);
-        Mockito.when(tokenSource.getToken()).thenReturn(validToken);
+        restClient = new K8sOidcRestClient(() -> validToken);
     }
 
 
     @Test
     void getOidcConfiguration() throws IOException {
-        MockWebServer server = new MockWebServer();
+        var mockOidcConfig = "{\"issuer\":\"https://kubernetes.default.svc.cluster.local\","
+                + "\"jwks_uri\":\"https://192.168.49.2:8443/openid/v1/jwks\","
+                + "\"response_types_supported\":[\"id_token\"],"
+                + "\"subject_types_supported\":[\"public\"],"
+                + "\"id_token_signing_alg_values_supported\":[\"RS256\"]}";
 
-        MockResponse response = new MockResponse();
-        response.setBody(mockOidcConfig);
-        server.enqueue(response);
+        try (MockWebServer server = new MockWebServer()) {
+            MockResponse response = new MockResponse();
+            response.setBody(mockOidcConfig);
+            server.enqueue(response);
+            server.start();
 
-        server.start();
-
-        HttpUrl baseUrl = server.url("");
-
-        Assertions.assertEquals("https://192.168.49.2:8443/openid/v1/jwks", restClient.getOidcConfiguration(baseUrl.toString()).getJwks_uri());
-
-        server.close();
+            var baseUrl = server.url("").toString();
+            var actual = restClient.getOidcConfiguration(baseUrl);
+            Assertions.assertEquals("https://192.168.49.2:8443/openid/v1/jwks", actual.getJwksUri());
+        }
     }
 
     @Test
     void getJwks() throws IOException {
-        MockWebServer server = new MockWebServer();
+        try (MockWebServer server = new MockWebServer()) {
+            MockResponse response = new MockResponse();
+            response.setBody(mockJwks);
+            server.enqueue(response);
 
-        MockResponse response = new MockResponse();
-        response.setBody(mockJwks);
-        server.enqueue(response);
-
-        server.start();
-
-        HttpUrl baseUrl = server.url("");
-
-        Assertions.assertEquals(mockJwks, restClient.getJwks(baseUrl.toString()));
-
-        server.close();
+            server.start();
+            var basePath = server.url("").toString();
+            Assertions.assertEquals(mockJwks, restClient.getJwks(basePath));
+        }
     }
 }

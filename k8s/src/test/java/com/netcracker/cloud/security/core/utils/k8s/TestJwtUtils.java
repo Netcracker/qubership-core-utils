@@ -1,6 +1,7 @@
 package com.netcracker.cloud.security.core.utils.k8s;
 
 import lombok.Getter;
+import lombok.SneakyThrows;
 import org.jose4j.jwk.JsonWebKeySet;
 import org.jose4j.jwk.RsaJsonWebKey;
 import org.jose4j.jwk.RsaJwkGenerator;
@@ -50,7 +51,8 @@ public class TestJwtUtils {
         return jws.getCompactSerialization();
     }
 
-    public String getDefaultClaimsJwt(String namespace) throws JoseException {
+    @SneakyThrows
+    public String getDefaultClaimsJwt(String namespace)  {
         JwtClaims validClaims = new JwtClaims();
         validClaims.setIssuer(jwtIssuer);
         validClaims.setAudience(dbaasJwtAudience);

@@ -27,14 +27,10 @@ class K8sTokenVerifierTest {
     void setUp() throws Exception {
         jwtUtils = new TestJwtUtils();
 
-        when(restClient.getOidcConfiguration(jwtUtils.getJwtIssuer())).thenReturn(new OidcConfig(jwtUtils.getJwksEndpoint()));
+        when(restClient.getOidcConfiguration(jwtUtils.getJwtIssuer())).thenReturn(new OidcConfigResponse(jwtUtils.getJwksEndpoint()));
         when(restClient.getJwks(jwtUtils.getJwksEndpoint())).thenReturn(jwtUtils.getJwks());
 
-        verifier = new K8sTokenVerifier(restClient, jwtUtils.getDbaasJwtAudience(), jwtUtils.getDefaultClaimsJwt("test-namespace"));
-    }
-
-    @AfterEach
-    void tearDown() {
+        verifier = new K8sTokenVerifier(restClient, jwtUtils.getDbaasJwtAudience(), () -> jwtUtils.getDefaultClaimsJwt("test-namespace"));
     }
 
     @Test

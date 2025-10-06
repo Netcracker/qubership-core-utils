@@ -13,38 +13,42 @@ import org.jose4j.jwt.consumer.JwtConsumerBuilder;
 import org.jose4j.jwt.consumer.JwtContext;
 import org.jose4j.lang.JoseException;
 
-import java.io.IOException;
-import java.util.List;
+import java.security.Key;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class K8sTokenVerifier {
     private static final String oidcTokenAud = "oidc-token";
 
-    private final Object lock = new Object();
-    private String jwksEndpoint;
-    private K8sOidcRestClient restClient;
-    private JwtConsumer jwtClaimsParser;
-    private List<JsonWebKey> jwksCache;
+    private final String jwksEndpoint;
+    private final K8sOidcRestClient restClient;
+    private final JwtConsumer jwtClaimsParser;
+    private final AtomicReference<Map<String, Key>> jwksCache = new AtomicReference<>();
 
     public K8sTokenVerifier(String jwtAudience) {
-        try {
-            TokenSource tokenSource = K8sTokenSource.createTokenSource(oidcTokenAud);
-            initialize(new K8sOidcRestClient(tokenSource), jwtAudience, tokenSource.getToken());
-        } catch (IOException | RuntimeException e) {
-            throw new RuntimeException("failed to create k8s token verifier (possibly projected volume token misconfigured in k8s deployment)", e);
-        }
+        this(new K8sOidcRestClient(
+                () -> KubernetesTokenSource.getToken(oidcTokenAud)),
+                jwtAudience,
+                () -> KubernetesTokenSource.getToken(oidcTokenAud)
+        );
     }
 
-    K8sTokenVerifier(K8sOidcRestClient restClient, String audience, String oidcToken) {
-        initialize(restClient, audience, oidcToken);
-    }
-
-    private void initialize(K8sOidcRestClient restClient, String jwtAudience, String oidcToken) {
-        this.restClient = restClient;
-        String issuer = this.getIssuerFromJwt(oidcToken);
-        this.jwtClaimsParser = getJwtClaimsParser(issuer, jwtAudience);
-        this.jwksEndpoint = restClient.getOidcConfiguration(issuer).getJwks_uri();
-        refreshJwksCache();
+    K8sTokenVerifier(K8sOidcRestClient restClient, String audience, Supplier<String> oidcToken) {
+         this.restClient = restClient;
+        String issuer = this.getIssuerFromJwt(oidcToken.get());
+        this.jwtClaimsParser = new JwtConsumerBuilder()
+                .setRequireExpirationTime()
+                .setAllowedClockSkewInSeconds(30)
+                .setRequireSubject()
+                .setExpectedIssuer(issuer)
+                .setExpectedAudience(audience)
+                .setSkipSignatureVerification()
+                .build();
+        this.jwksEndpoint = restClient.getOidcConfiguration(issuer).getJwksUri();
+        this.jwksCache.set(fetchKeys());
     }
 
     public JwtClaims verify(String token) throws K8sTokenVerificationException {
@@ -53,20 +57,24 @@ public class K8sTokenVerifier {
             verifySignature(token, jwtContext);
             return jwtContext.getJwtClaims();
         } catch (InvalidJwtException e) {
-            throw new K8sTokenVerificationException("failed to verify k8s token", e);
+            throw new K8sTokenVerificationException("Failed to verify k8s token", e);
         }
     }
 
     private void verifySignature(String token, JwtContext jwtContext) throws K8sTokenVerificationException {
-        String keyId = jwtContext.getJoseObjects().getFirst().getKeyIdHeaderValue();
-        JsonWebKey jsonWebKey = getJwk(keyId);
-        if (jsonWebKey == null) {
+        if (jwtContext.getJoseObjects().isEmpty())  {
+            throw new K8sTokenVerificationException("jwtContext is empty");
+        }
+
+        String keyId = jwtContext.getJoseObjects().get(0).getKeyIdHeaderValue();
+        var key = getJwk(keyId);
+        if (key == null) {
             throw new K8sTokenVerificationException("jwk not found");
         }
         JsonWebSignature jws = new JsonWebSignature();
         try {
             jws.setCompactSerialization(token);
-            jws.setKey(jsonWebKey.getKey());
+            jws.setKey(key);
 
             if (!jws.verifySignature()) {
                 throw new K8sTokenVerificationException("jwt token has an invalid signature");
@@ -76,41 +84,34 @@ public class K8sTokenVerifier {
         }
     }
 
-    private void refreshJwksCache() {
+    private Map<String, Key> fetchKeys() {
         try {
-            String rawJwks = restClient.getJwks(jwksEndpoint);
-            jwksCache = new JsonWebKeySet(rawJwks).getJsonWebKeys();
+            var rawJwks = restClient.getJwks(jwksEndpoint);
+            return new JsonWebKeySet(rawJwks)
+                    .getJsonWebKeys()
+                    .stream()
+                    .collect(Collectors.toMap(JsonWebKey::getKeyId, JsonWebKey::getKey));
         } catch (TimeoutExceededException | JoseException e) {
-            String msg = "Getting Json web keys from kubernetes jwks endpoint %s failed".formatted(jwksEndpoint);
+            String msg = String.format("Getting Json web keys from kubernetes jwks endpoint %s failed", jwksEndpoint);
             log.error(msg, e);
             throw new RuntimeException(msg, e);
         }
     }
 
-    private JsonWebKey getJwk(String keyId) {
-        JsonWebKey jwk = getJwksFromCache(keyId);
-        if (jwk != null) {
-            return jwk;
+    private Key getJwk(String keyId) {
+        var key = jwksCache.get().get(keyId);
+        if (key != null) {
+            return key;
         }
-        synchronized (lock) {
-            JsonWebKey jwksFromCache = getJwksFromCache(keyId);
-            if (jwksFromCache != null) {
-                return jwksFromCache;
+        synchronized(jwksCache) {
+            key = jwksCache.get().get(keyId);
+            if (key != null) {
+                return key;
             }
 
-            refreshJwksCache();
+            this.jwksCache.set(fetchKeys());
         }
-        return getJwksFromCache(keyId);
-    }
-
-    private JsonWebKey getJwksFromCache(String keyId) {
-        List<JsonWebKey> jwks = jwksCache;
-        for (JsonWebKey jwk : jwks) {
-            if (keyId.equals(jwk.getKeyId())) {
-                return jwk;
-            }
-        }
-        return null;
+        return jwksCache.get().get(keyId);
     }
 
     private String getIssuerFromJwt(String token) {
@@ -120,22 +121,9 @@ public class K8sTokenVerifier {
                     .setDisableRequireSignature()
                     .setSkipSignatureVerification()
                     .build();
-            JwtContext jwtContext = null;
-            jwtContext = jwtConsumer.process(token);
-            return jwtContext.getJwtClaims().getIssuer();
+            return jwtConsumer.process(token).getJwtClaims().getIssuer();
         } catch (InvalidJwtException | MalformedClaimException e) {
             throw new RuntimeException("failed to get issuer from k8s projected volume token", e);
         }
-    }
-
-    private JwtConsumer getJwtClaimsParser(String issuer, String audience) {
-        return new JwtConsumerBuilder()
-                .setRequireExpirationTime()
-                .setAllowedClockSkewInSeconds(30)
-                .setRequireSubject()
-                .setExpectedIssuer(issuer)
-                .setExpectedAudience(audience)
-                .setSkipSignatureVerification()
-                .build();
     }
 }
