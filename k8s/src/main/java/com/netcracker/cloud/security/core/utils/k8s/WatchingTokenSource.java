@@ -20,13 +20,11 @@ import static java.time.temporal.ChronoUnit.NANOS;
 @Slf4j
 @Priority(0)
 public class WatchingTokenSource  implements TokenSource {
-    // TODO align system property name to all other declared in cloud code
     public static final String TOKENS_DIR_PROP = "com.netcracker.cloud.security.kubernetes.tokens.dir";
     public static final String SERVICE_ACCOUNT_DIR_PROP = "com.netcracker.cloud.security.kubernetes.serviceaccount.dir";
     public static final Path TOKENS_DIR_DEFAULT = Paths.get("/var/run/secrets/tokens");
     public static final Path SERVICE_ACCOUNT_DIR_DEFAULT = Paths.get("/var/run/secrets/kubernetes.io/serviceaccount");
 
-    // TODO align system property name to all other declared in cloud code
     public static final String POLLING_INTERVAL_PROP = "com.netcracker.cloud.security.kubernetes.tokens.polling.interval";
     // In practice, the refresh happens at about 80% of the expiration time.
     // And taking into account that minimal update interval is 10 min, I choose 1 min
