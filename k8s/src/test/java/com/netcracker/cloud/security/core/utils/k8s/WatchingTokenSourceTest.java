@@ -11,9 +11,10 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
-import static com.netcracker.cloud.security.core.utils.k8s.WatchingTokenSource.POLLING_INTERVAL_PROP;
-import static com.netcracker.cloud.security.core.utils.k8s.WatchingTokenSource.TOKENS_DIR_PROP;
+import static com.netcracker.cloud.security.core.utils.k8s.WatchingTokenSource.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class WatchingTokenSourceTest {
@@ -27,7 +28,7 @@ class WatchingTokenSourceTest {
         var interval = Duration.ofMillis(10);
         updateToken(storageRoot, "dbaas", "token1");
 
-        try (var ts = new WatchingTokenSource(storageRoot, interval)) {
+        try (var ts = new WatchingTokenSource(storageRoot, storageRoot, interval)) {
             assertEquals("token1", ts.getToken("dbaas"));
 
             // test update
@@ -38,18 +39,21 @@ class WatchingTokenSourceTest {
 
     @Test
     void testDefaultConstructor(@TempDir Path storageRoot) throws Exception {
-        withProperty(TOKENS_DIR_PROP, storageRoot.toString(), () ->
-            withProperty(POLLING_INTERVAL_PROP, "PT0.010S", () -> {
-                updateToken(storageRoot, "dbaas", "token1");
+        var props = new HashMap<String, String>();
+        props.put(TOKENS_DIR_PROP, storageRoot.toString());
+        props.put(SERVICE_ACCOUNT_DIR_PROP, storageRoot.toString());
+        props.put(POLLING_INTERVAL_PROP, "PT0.010S");
+        withProperty(props, () -> {
+                    updateToken(storageRoot, "dbaas", "token1");
 
-                try (var ts = new WatchingTokenSource()) {
-                    assertEquals("token1", ts.getToken("dbaas"));
+                    try (var ts = new WatchingTokenSource()) {
+                        assertEquals("token1", ts.getToken("dbaas"));
 
-                    // test update
-                    updateToken(storageRoot, "dbaas", "token2");
-                    Failsafe.with(retryPolicy).run(() -> assertEquals("token2", ts.getToken("dbaas")));
+                        // test update
+                        updateToken(storageRoot, "dbaas", "token2");
+                        Failsafe.with(retryPolicy).run(() -> assertEquals("token2", ts.getToken("dbaas")));
+                    }
                 }
-            })
         );
     }
 
@@ -94,17 +98,22 @@ class WatchingTokenSourceTest {
         }
     }
 
-    void withProperty(String name, String value, OmnivoreRunnable runnable) throws Exception {
-        var previousValue = System.getProperty(name);
-        System.setProperty(name, value);
+    void withProperty(Map<String, String> properties, OmnivoreRunnable runnable) throws Exception {
+        var previousValues = new HashMap<String, String>();
+        properties.forEach((name, value) -> {
+            previousValues.put(name, System.getProperty(name));
+            System.setProperty(name, value);
+        });
         try {
             runnable.run();
         } finally {
-            if (previousValue != null) {
-                System.setProperty(name, previousValue);
-            } else {
-                System.clearProperty(name);
-            }
+            previousValues.forEach((name, previousValue) -> {
+                if (previousValue != null) {
+                    System.setProperty(name, previousValue);
+                } else {
+                    System.clearProperty(name);
+                }
+            });
         }
     }
 

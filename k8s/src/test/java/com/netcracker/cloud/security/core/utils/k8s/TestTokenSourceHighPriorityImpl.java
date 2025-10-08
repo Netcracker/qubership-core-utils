@@ -8,6 +8,11 @@ public class TestTokenSourceHighPriorityImpl implements TokenSource {
     }
 
     @Override
+    public String getDefaultToken() {
+        return "test-token";
+    }
+
+    @Override
     public void close() throws Exception {
     }
 }
