@@ -29,12 +29,13 @@ class WatchingTokenSourceTest {
         var interval = Duration.ofMillis(10);
         updateToken(storageRoot, "dbaas", "token1");
 
-        var ts = new WatchingTokenSource(storageRoot, interval, KubernetesProjectedVolumeWatcher.EXECUTOR);
-        assertEquals("token1", ts.getToken("dbaas"));
+        try(var ts = new WatchingTokenSource(storageRoot, interval, KubernetesProjectedVolumeWatcher.EXECUTOR)) {
+            assertEquals("token1", ts.getToken("dbaas"));
 
-        // test update
-        updateToken(storageRoot, "dbaas", "token2");
-        Failsafe.with(retryPolicy).run(() -> assertEquals("token2", ts.getToken("dbaas")));
+            // test update
+            updateToken(storageRoot, "dbaas", "token2");
+            Failsafe.with(retryPolicy).run(() -> assertEquals("token2", ts.getToken("dbaas")));
+        }
     }
 
     @Test
@@ -46,13 +47,14 @@ class WatchingTokenSourceTest {
         withProperty(props, () -> {
                     updateToken(storageRoot, "dbaas", "token1");
 
-                    var ts = new WatchingTokenSource();
-                    assertEquals("token1", ts.getToken("dbaas"));
+                    try(var ts = new WatchingTokenSource()) {
+                        assertEquals("token1", ts.getToken("dbaas"));
 
-                    // test update
-                    updateToken(storageRoot, "dbaas", "token2");
-                    Failsafe.with(retryPolicy).run(() -> assertEquals("token2", ts.getToken("dbaas")));
-                    Failsafe.with(retryPolicy).run(() -> assertEquals("token2", KubernetesDefaultToken.getToken()));
+                        // test update
+                        updateToken(storageRoot, "dbaas", "token2");
+                        Failsafe.with(retryPolicy).run(() -> assertEquals("token2", ts.getToken("dbaas")));
+                        Failsafe.with(retryPolicy).run(() -> assertEquals("token2", KubernetesDefaultToken.getToken()));
+                    }
                 }
         );
     }

@@ -1,5 +1,6 @@
 package com.netcracker.cloud.security.core.utils.k8s.impl;
 
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,6 +38,7 @@ public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
         watchService = FileSystems.getDefault().newWatchService();
         this.storageRoot.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
 
+        log.info("Start watcher for: {}", storageRoot);
         this.scheduledEventsPollTask = scheduler.scheduleAtFixedRate(this::processFilesystemEvents,
                 interval.get(ChronoUnit.NANOS),
                 interval.get(NANOS),
@@ -76,6 +78,7 @@ public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
 
     @Override
     public void close() {
+        log.info("Watcher closed for: {}", storageRoot);
         scheduledEventsPollTask.cancel(false);
     }
 }
