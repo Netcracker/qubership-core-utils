@@ -25,13 +25,13 @@ public class KubernetesDefaultToken {
             .map(Duration::parse)
             .orElse(POLLING_INTERVAL_DEFAULT);
 
+    private static final AtomicReference<Try<String>> token = new AtomicReference<>();
+
     private static final KubernetesProjectedVolumeWatcher watcher = new KubernetesProjectedVolumeWatcher(
                 storageRoot,
                 interval,
                 KubernetesProjectedVolumeWatcher.EXECUTOR,
                 KubernetesDefaultToken::updateCache);
-
-    private static AtomicReference<Try<String>> token;
 
     // TODO add documentation
     public static String getToken() {
