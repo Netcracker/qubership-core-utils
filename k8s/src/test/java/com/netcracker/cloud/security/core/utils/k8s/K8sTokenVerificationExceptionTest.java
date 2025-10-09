@@ -70,8 +70,8 @@ class K8sTokenVerificationExceptionTest {
     void testExceptionInheritanceFromException() {
         K8sTokenVerificationException exception = new K8sTokenVerificationException("Test");
 
-        assertTrue(exception instanceof Exception);
-        assertTrue(exception instanceof Throwable);
+        assertInstanceOf(Exception.class, exception);
+        assertInstanceOf(Throwable.class, exception);
     }
 
     @Test

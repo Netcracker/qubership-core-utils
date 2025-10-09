@@ -8,11 +8,6 @@ public class TestTokenSourceLowPriorityImpl implements TokenSource {
     }
 
     @Override
-    public String getDefaultToken() {
-        throw new IllegalStateException("Unexpected call");
-    }
-
-    @Override
-    public void close() throws Exception {
+    public void close() {
     }
 }

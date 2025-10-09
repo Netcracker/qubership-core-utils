@@ -38,10 +38,6 @@ public class KubernetesTokenSource {
         return INSTANCE.getToken(audience);
     }
 
-    public static String getDefaultToken() {
-        return INSTANCE.getDefaultToken();
-    }
-
     @Value
     private static class TokenImplementation {
         int  priority;

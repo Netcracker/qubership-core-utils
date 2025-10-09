@@ -1,6 +1,6 @@
-package com.netcracker.cloud.security.core.utils.k8s;
+package com.netcracker.cloud.security.core.utils.k8s.impl;
 
-import okhttp3.HttpUrl;
+import com.netcracker.cloud.security.core.utils.k8s.TestJwtUtils;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.jose4j.lang.JoseException;
@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
@@ -44,7 +42,7 @@ class K8sOidcRestClientTest {
 
             var baseUrl = server.url("").toString();
             var actual = restClient.getOidcConfiguration(baseUrl);
-            Assertions.assertEquals("https://192.168.49.2:8443/openid/v1/jwks", actual.getJwksUri());
+            Assertions.assertEquals("https://192.168.49.2:8443/openid/v1/jwks", actual);
         }
     }
 

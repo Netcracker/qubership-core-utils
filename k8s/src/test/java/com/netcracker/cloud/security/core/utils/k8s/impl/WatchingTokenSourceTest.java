@@ -1,4 +1,4 @@
-package com.netcracker.cloud.security.core.utils.k8s;
+package com.netcracker.cloud.security.core.utils.k8s.impl;
 
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.netcracker.cloud.security.core.utils.k8s.WatchingTokenSource.*;
+import static com.netcracker.cloud.security.core.utils.k8s.impl.WatchingTokenSource.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class WatchingTokenSourceTest {

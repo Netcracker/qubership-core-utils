@@ -1,8 +1,8 @@
 package com.netcracker.cloud.security.core.utils.k8s;
 
+import com.netcracker.cloud.security.core.utils.k8s.impl.K8sOidcRestClient;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.NumericDate;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,10 +27,10 @@ class K8sTokenVerifierTest {
     void setUp() throws Exception {
         jwtUtils = new TestJwtUtils();
 
-        when(restClient.getOidcConfiguration(jwtUtils.getJwtIssuer())).thenReturn(new OidcConfigResponse(jwtUtils.getJwksEndpoint()));
+        when(restClient.getOidcConfiguration(jwtUtils.getJwtIssuer())).thenReturn(jwtUtils.getJwksEndpoint());
         when(restClient.getJwks(jwtUtils.getJwksEndpoint())).thenReturn(jwtUtils.getJwks());
 
-        verifier = new K8sTokenVerifier(restClient, jwtUtils.getDbaasJwtAudience(), () -> jwtUtils.getDefaultClaimsJwt("test-namespace"));
+        verifier = new K8sTokenVerifier(restClient, jwtUtils.getDbaasJwtAudience(), () -> jwtUtils.getDefaultClaimsJwt("test-namespace"), K8sTokenVerifier.JWKS_VALID_INTERVAL_DEFAULT);
     }
 
     @Test

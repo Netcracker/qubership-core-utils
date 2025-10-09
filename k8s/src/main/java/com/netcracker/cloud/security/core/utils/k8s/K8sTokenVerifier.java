@@ -1,5 +1,6 @@
 package com.netcracker.cloud.security.core.utils.k8s;
 
+import com.netcracker.cloud.security.core.utils.k8s.impl.K8sOidcRestClient;
 import lombok.extern.slf4j.Slf4j;
 import net.jodah.failsafe.TimeoutExceededException;
 import org.jose4j.jwk.JsonWebKey;
@@ -14,30 +15,39 @@ import org.jose4j.jwt.consumer.JwtContext;
 import org.jose4j.lang.JoseException;
 
 import java.security.Key;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Slf4j
 public class K8sTokenVerifier {
-    private static final String oidcTokenAud = "oidc-token";
+    public static final String JWKS_VALID_INTERVAL_PROP = "com.netcracker.cloud.security.kubernetes.jwks.valid-interval";
+    public static final Duration JWKS_VALID_INTERVAL_DEFAULT = Duration.ofDays(1);
 
     private final String jwksEndpoint;
     private final K8sOidcRestClient restClient;
     private final JwtConsumer jwtClaimsParser;
     private final AtomicReference<Map<String, Key>> jwksCache = new AtomicReference<>();
+    private final Duration jwksValidInterval;
+    private final AtomicReference<Instant> jwksExpiration = new AtomicReference<>(Instant.MIN);
 
     public K8sTokenVerifier(String jwtAudience) {
         this(new K8sOidcRestClient(
-                () -> KubernetesTokenSource.getToken(oidcTokenAud)),
+                () -> KubernetesTokenSource.getToken(K8sTokenAudiences.KUBERNETES_API)),
                 jwtAudience,
-                () -> KubernetesTokenSource.getToken(oidcTokenAud)
+                () -> KubernetesTokenSource.getToken(K8sTokenAudiences.KUBERNETES_API),
+                Optional.ofNullable(System.getProperty(JWKS_VALID_INTERVAL_PROP))
+                        .map(Duration::parse)
+                        .orElse(JWKS_VALID_INTERVAL_DEFAULT)
         );
     }
 
-    K8sTokenVerifier(K8sOidcRestClient restClient, String audience, Supplier<String> oidcToken) {
-         this.restClient = restClient;
+    K8sTokenVerifier(K8sOidcRestClient restClient, String audience, Supplier<String> oidcToken, Duration jwksValidInterval) {
+        this.restClient = restClient;
         String issuer = this.getIssuerFromJwt(oidcToken.get());
         this.jwtClaimsParser = new JwtConsumerBuilder()
                 .setRequireExpirationTime()
@@ -47,7 +57,8 @@ public class K8sTokenVerifier {
                 .setExpectedAudience(audience)
                 .setSkipSignatureVerification()
                 .build();
-        this.jwksEndpoint = restClient.getOidcConfiguration(issuer).getJwksUri();
+        this.jwksEndpoint = restClient.getOidcConfiguration(issuer);
+        this.jwksValidInterval = jwksValidInterval;
         this.jwksCache.set(fetchKeys());
     }
 
@@ -87,6 +98,7 @@ public class K8sTokenVerifier {
     private Map<String, Key> fetchKeys() {
         try {
             var rawJwks = restClient.getJwks(jwksEndpoint);
+            jwksExpiration.set(Instant.now().plus(jwksValidInterval));
             return new JsonWebKeySet(rawJwks)
                     .getJsonWebKeys()
                     .stream()
@@ -99,17 +111,23 @@ public class K8sTokenVerifier {
     }
 
     private Key getJwk(String keyId) {
-        var key = jwksCache.get().get(keyId);
+        var key = getJwkFromCache(keyId);
         if (key != null) {
             return key;
         }
         synchronized(jwksCache) {
-            key = jwksCache.get().get(keyId);
+            key = getJwkFromCache(keyId);
             if (key != null) {
                 return key;
             }
-
             this.jwksCache.set(fetchKeys());
+        }
+        return jwksCache.get().get(keyId);
+    }
+
+    private Key getJwkFromCache(String keyId) {
+        if(jwksExpiration.get().isBefore(Instant.now())) {
+            return null;
         }
         return jwksCache.get().get(keyId);
     }

@@ -1,4 +1,4 @@
-package com.netcracker.cloud.security.core.utils.k8s;
+package com.netcracker.cloud.security.core.utils.k8s.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
@@ -6,7 +6,6 @@ import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 import org.apache.commons.lang3.StringUtils;
 
-import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
@@ -19,7 +18,7 @@ import java.util.function.Supplier;
 import static java.net.HttpURLConnection.HTTP_OK;
 
 @Slf4j
-class K8sOidcRestClient {
+public class K8sOidcRestClient {
     private static final int retryPolicyBackoffMaxAttempts = 5;
     private static final Duration retryPolicyBackoffDelay = Duration.ofMillis(500);
     private static final Duration retryPolicyBackoffMaxDelay = Duration.ofSeconds(15);
@@ -38,18 +37,18 @@ class K8sOidcRestClient {
         this.tokenSupplier = tokenSupplier;
     }
 
-    public OidcConfigResponse getOidcConfiguration(String issuer) {
+    public String getOidcConfiguration(String issuer) {
         var url = issuer + "/.well-known/openid-configuration";
         log.info("Request OIDC configuration for {}", url);
         try {
-            return objectMapper.readValue(doRequest(url), OidcConfigResponse.class);
+            return objectMapper.readValue(doRequest(url), OidcConfigResponse.class).getJwksUri();
         } catch (Exception e) {
             throw new RuntimeException(String.format("Failed to get OIDC configuration with issuer %s from Kubernetes", issuer), e);
         }
     }
 
     public String getJwks(String jwksEndpoint) {
-        log.info("Request JWKS data from: {}", jwksEndpoint);
+        log.debug("Request JWKS data from: {}", jwksEndpoint);
         return doRequest(jwksEndpoint);
     }
 
@@ -61,7 +60,7 @@ class K8sOidcRestClient {
             throw new RuntimeException("Can't parse " + url + " to URI form", e);
         }
 
-        log.info("Perform request: GET {}", url);
+        log.debug("Perform request: GET {}", url);
         var request = HttpRequest.newBuilder()
                 .setHeader("Authorization", tokenSupplier.get())
                 .uri(uri)

@@ -1,4 +1,4 @@
-package com.netcracker.cloud.security.core.utils.k8s;
+package com.netcracker.cloud.security.core.utils.k8s.impl;
 
 import org.junit.jupiter.api.Test;
 

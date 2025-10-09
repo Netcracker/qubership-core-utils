@@ -1,5 +1,7 @@
-package com.netcracker.cloud.security.core.utils.k8s;
+package com.netcracker.cloud.security.core.utils.k8s.impl;
 
+import com.netcracker.cloud.security.core.utils.k8s.Priority;
+import com.netcracker.cloud.security.core.utils.k8s.TokenSource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,6 +71,14 @@ public class WatchingTokenSource  implements TokenSource {
         updateCache();
     }
 
+    @Override
+    public String getToken(String audience) {
+        return cache.getOrDefault(
+                audience,
+                Try.failure(new IllegalArgumentException("Unknown token audience: " + audience))
+        ).getOrThrow();
+    }
+
     private void processFilesystemEvents() {
         try {
             log.trace("Check fs events queue");
@@ -120,19 +130,6 @@ public class WatchingTokenSource  implements TokenSource {
                 audience,
                 Try.of(() -> Files.readString(tokenDir.resolve("token")))
         );
-    }
-
-    @Override
-    public String getToken(String audience) {
-        return cache.getOrDefault(
-                audience,
-                Try.failure(new IllegalArgumentException("Unknown token audience: " + audience))
-            ).getOrThrow();
-    }
-
-    @Override
-    public String getDefaultToken() {
-        return getToken(DEFAULT_TOKEN_AUDIENCE);
     }
 
     // this method can be used to override thread management
