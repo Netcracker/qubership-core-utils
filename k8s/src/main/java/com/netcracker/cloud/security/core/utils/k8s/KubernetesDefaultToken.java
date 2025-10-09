@@ -42,6 +42,12 @@ public class KubernetesDefaultToken {
 
     private static void updateCache(Path storageRoot) {
         var tokenPath = storageRoot.resolve("token");
-        token.set(Try.of(() -> Files.readString(tokenPath)));
+        Try<String> value;
+        try {
+            value = Try.success(Files.readString(tokenPath));
+        } catch (Exception e) {
+            value = Try.failure(new RuntimeException("Error read token from: " + tokenPath, e));
+        }
+        token.set(value);
     }
 }
