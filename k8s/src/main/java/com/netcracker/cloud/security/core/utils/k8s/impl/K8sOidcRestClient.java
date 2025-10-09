@@ -19,16 +19,16 @@ import static java.net.HttpURLConnection.HTTP_OK;
 
 @Slf4j
 public class K8sOidcRestClient {
-    private static final int retryPolicyBackoffMaxAttempts = 5;
-    private static final Duration retryPolicyBackoffDelay = Duration.ofMillis(500);
-    private static final Duration retryPolicyBackoffMaxDelay = Duration.ofSeconds(15);
-    private static final Duration retryPolicyJitter = Duration.ofMillis(100);
+    private static final int RETRY_POLICY_BACKOFF_MAX_ATTEMPTS = 5;
+    private static final Duration RETRY_POLICY_BACKOFF_DELAY = Duration.ofMillis(500);
+    private static final Duration RETRY_POLICY_BACKOFF_MAX_DELAY = Duration.ofSeconds(15);
+    private static final Duration RETRY_POLICY_JITTER = Duration.ofMillis(100);
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RetryPolicy<HttpResponse<String>> retryPolicy = new RetryPolicy<HttpResponse<String>>()
-            .withMaxRetries(retryPolicyBackoffMaxAttempts)
-            .withBackoff(retryPolicyBackoffDelay.toMillis(), retryPolicyBackoffMaxDelay.toMillis(), ChronoUnit.MILLIS)
-            .withJitter(retryPolicyJitter)
+            .withMaxRetries(RETRY_POLICY_BACKOFF_MAX_ATTEMPTS)
+            .withBackoff(RETRY_POLICY_BACKOFF_DELAY.toMillis(), RETRY_POLICY_BACKOFF_MAX_DELAY.toMillis(), ChronoUnit.MILLIS)
+            .withJitter(RETRY_POLICY_JITTER)
             .handleResultIf(res -> res.statusCode() / 100 == 5);
     private final HttpClient client = HttpClient.newHttpClient();
     private final Supplier<String> tokenSupplier;
