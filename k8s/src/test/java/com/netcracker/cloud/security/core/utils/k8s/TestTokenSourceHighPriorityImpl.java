@@ -6,5 +6,8 @@ public class TestTokenSourceHighPriorityImpl implements TokenSource {
     public String getToken(String audience) {
         return "test-token";
     }
+
+    @Override
+    public void close() {}
 }
 

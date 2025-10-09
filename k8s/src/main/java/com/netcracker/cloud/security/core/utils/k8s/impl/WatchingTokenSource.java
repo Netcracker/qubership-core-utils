@@ -72,10 +72,16 @@ public class WatchingTokenSource  implements TokenSource {
             log.error("Cannot list folder: {}",  storageRoot);
         }
     }
+
     private void refreshToken(String audience, Path tokenDir) {
         cache.put(
                 audience,
                 Try.of(() -> Files.readString(tokenDir.resolve("token")))
         );
+    }
+
+    @Override
+    public void close() {
+        watcher.close();
     }
 }

@@ -17,11 +17,11 @@ public class KubernetesDefaultToken {
     public static final String POLLING_INTERVAL_PROP = "com.netcracker.cloud.security.kubernetes.tokens.polling.interval";
     public static final Duration POLLING_INTERVAL_DEFAULT = Duration.ofMinutes(1);
 
-    private static final Path storageRoot = Optional.of(System.getProperty(SERVICE_ACCOUNT_DIR_PROP))
+    private static final Path storageRoot = Optional.ofNullable(System.getProperty(SERVICE_ACCOUNT_DIR_PROP))
             .map(Paths::get)
             .orElse(SERVICE_ACCOUNT_DIR_DEFAULT);
 
-    private static final Duration interval = Optional.of(System.getProperty(POLLING_INTERVAL_PROP))
+    private static final Duration interval = Optional.ofNullable(System.getProperty(POLLING_INTERVAL_PROP))
             .map(Duration::parse)
             .orElse(POLLING_INTERVAL_DEFAULT);
 

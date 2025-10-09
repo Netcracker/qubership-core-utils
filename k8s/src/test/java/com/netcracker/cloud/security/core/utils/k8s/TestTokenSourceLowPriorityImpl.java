@@ -6,4 +6,7 @@ public class TestTokenSourceLowPriorityImpl implements TokenSource {
     public String getToken(String audience) {
         throw new IllegalStateException("Unexpected call");
     }
+
+    @Override
+    public void close() {}
 }

@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -22,9 +23,9 @@ public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
     private static final String UPDATE_MARKER = "..data";
 
     private final Path storageRoot;
-    private final ScheduledExecutorService scheduler;
     private final Consumer<Path> cacheUpdate;
     private final WatchService watchService;
+    private final ScheduledFuture<?> scheduledEventsPollTask;
 
     @SneakyThrows
     public KubernetesProjectedVolumeWatcher(Path storageRoot,
@@ -32,13 +33,12 @@ public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
                                             ScheduledExecutorService scheduler,
                                             Consumer<Path> cacheUpdate) {
         this.storageRoot = storageRoot;
-        this.scheduler = scheduler;
         this.cacheUpdate = cacheUpdate;
 
         watchService = FileSystems.getDefault().newWatchService();
         this.storageRoot.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
 
-        scheduler.scheduleAtFixedRate(this::processFilesystemEvents,
+        this.scheduledEventsPollTask = scheduler.scheduleAtFixedRate(this::processFilesystemEvents,
                 interval.get(ChronoUnit.NANOS),
                 interval.get(NANOS),
                 TimeUnit.NANOSECONDS);
@@ -76,7 +76,7 @@ public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
     }
 
     @Override
-    public void close() throws Exception {
-        scheduler.shutdown();
+    public void close() {
+        scheduledEventsPollTask.cancel(false);
     }
 }
