@@ -13,6 +13,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import static com.netcracker.cloud.security.core.utils.k8s.impl.WatchingTokenSource.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,7 +30,7 @@ class WatchingTokenSourceTest {
         var interval = Duration.ofMillis(10);
         updateToken(storageRoot, "dbaas", "token1");
 
-        try (var ts = new WatchingTokenSource(storageRoot, storageRoot, interval)) {
+        try (var ts = new WatchingTokenSource(storageRoot, interval, KubernetesProjectedVolumeWatcher.EXECUTOR)) {
             assertEquals("token1", ts.getToken("dbaas"));
 
             // test update
@@ -41,7 +43,6 @@ class WatchingTokenSourceTest {
     void testDefaultConstructor(@TempDir Path storageRoot) throws Exception {
         var props = new HashMap<String, String>();
         props.put(TOKENS_DIR_PROP, storageRoot.toString());
-        props.put(SERVICE_ACCOUNT_DIR_PROP, storageRoot.toString());
         props.put(POLLING_INTERVAL_PROP, "PT0.010S");
         withProperty(props, () -> {
                     updateToken(storageRoot, "dbaas", "token1");

@@ -36,10 +36,10 @@ public class KubernetesTokenVerifier {
     private final AtomicReference<Instant> jwksExpiration = new AtomicReference<>(Instant.MIN);
 
     public KubernetesTokenVerifier(String jwtAudience) {
-        this(new KubernetesOidcRestClient(
-                () -> KubernetesTokenSource.getToken(KubernetesTokenAudiences.KUBERNETES_API)),
+        this(
+                new KubernetesOidcRestClient(KubernetesDefaultToken::getToken),
                 jwtAudience,
-                () -> KubernetesTokenSource.getToken(KubernetesTokenAudiences.KUBERNETES_API),
+                KubernetesDefaultToken::getToken,
                 Optional.ofNullable(System.getProperty(JWKS_VALID_INTERVAL_PROP))
                         .map(Duration::parse)
                         .orElse(JWKS_VALID_INTERVAL_DEFAULT)

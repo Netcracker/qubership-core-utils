@@ -3,7 +3,7 @@ package com.netcracker.cloud.security.core.utils.k8s.impl;
 import lombok.AllArgsConstructor;
 
 // Simple utility class inspired by scala Try
-interface Try<T> {
+public interface Try<T> {
     @FunctionalInterface
     interface OmnivoreSupplier<T> {
         T get() throws Exception;
