@@ -48,6 +48,9 @@ public class WatchingTokenSource  implements TokenSource {
         this.watcher = new KubernetesProjectedVolumeWatcher(storageRoot, interval, scheduler, this::updateCache);
     }
 
+	/**
+     * getToken method returns the corresponding Kubernetes projected volume token string by audience
+     */
     @Override
     public String getToken(String audience) {
         return cache.getOrDefault(

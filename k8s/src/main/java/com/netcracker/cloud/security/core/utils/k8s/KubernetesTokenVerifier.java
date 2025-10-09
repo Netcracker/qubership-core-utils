@@ -62,6 +62,9 @@ public class KubernetesTokenVerifier {
         this.jwksCache.set(fetchKeys());
     }
 
+	/**
+     * verify method verifies the given token with JWKS obtained from Kubernetes OIDC. It verifies the signature and checks if token claims are valid. If the token is valid token's claims are returned. Otherwise exception is thrown
+     */
     public JwtClaims verify(String token) throws KubernetesTokenVerificationException {
         try {
             JwtContext jwtContext = jwtClaimsParser.process(token);

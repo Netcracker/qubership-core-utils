@@ -33,7 +33,9 @@ public class KubernetesDefaultToken {
                 KubernetesProjectedVolumeWatcher.EXECUTOR,
                 KubernetesDefaultToken::updateCache);
 
-    // TODO add documentation
+	/**
+     * getToken method returns the default Kubernetes service account token string
+     */
     public static String getToken() {
         return token.get().getOrThrow();
     }

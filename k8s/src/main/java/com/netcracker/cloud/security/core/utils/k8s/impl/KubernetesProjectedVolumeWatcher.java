@@ -16,7 +16,6 @@ import static java.time.temporal.ChronoUnit.NANOS;
 
 @Slf4j
 public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
-    // TODO is lazy really needed here or it is overengineering
     public static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(1);
 
     // this is link to actual data container. Handle this link update event to update cache
