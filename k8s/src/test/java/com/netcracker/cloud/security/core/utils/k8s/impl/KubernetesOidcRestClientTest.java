@@ -13,16 +13,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 
 @ExtendWith(MockitoExtension.class)
-class K8sOidcRestClientTest {
+class KubernetesOidcRestClientTest {
     private String mockJwks;
-    private K8sOidcRestClient restClient;
+    private KubernetesOidcRestClient restClient;
 
     @BeforeEach
     void setUp() throws IOException, JoseException {
         TestJwtUtils jwtUtils = new TestJwtUtils();
         mockJwks = jwtUtils.getJwks();
         String validToken = jwtUtils.getDefaultClaimsJwt("test-namespace");
-        restClient = new K8sOidcRestClient(() -> validToken);
+        restClient = new KubernetesOidcRestClient(() -> validToken);
     }
 
 

@@ -1,6 +1,6 @@
 package com.netcracker.cloud.security.core.utils.k8s;
 
-import com.netcracker.cloud.security.core.utils.k8s.impl.K8sOidcRestClient;
+import com.netcracker.cloud.security.core.utils.k8s.impl.KubernetesOidcRestClient;
 import lombok.extern.slf4j.Slf4j;
 import net.jodah.failsafe.TimeoutExceededException;
 import org.jose4j.jwk.JsonWebKey;
@@ -24,29 +24,29 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class K8sTokenVerifier {
+public class KubernetesTokenVerifier {
     public static final String JWKS_VALID_INTERVAL_PROP = "com.netcracker.cloud.security.kubernetes.jwks.valid-interval";
     public static final Duration JWKS_VALID_INTERVAL_DEFAULT = Duration.ofDays(1);
 
     private final String jwksEndpoint;
-    private final K8sOidcRestClient restClient;
+    private final KubernetesOidcRestClient restClient;
     private final JwtConsumer jwtClaimsParser;
     private final AtomicReference<Map<String, Key>> jwksCache = new AtomicReference<>();
     private final Duration jwksValidInterval;
     private final AtomicReference<Instant> jwksExpiration = new AtomicReference<>(Instant.MIN);
 
-    public K8sTokenVerifier(String jwtAudience) {
-        this(new K8sOidcRestClient(
-                () -> KubernetesTokenSource.getToken(K8sTokenAudiences.KUBERNETES_API)),
+    public KubernetesTokenVerifier(String jwtAudience) {
+        this(new KubernetesOidcRestClient(
+                () -> KubernetesTokenSource.getToken(KubernetesTokenAudiences.KUBERNETES_API)),
                 jwtAudience,
-                () -> KubernetesTokenSource.getToken(K8sTokenAudiences.KUBERNETES_API),
+                () -> KubernetesTokenSource.getToken(KubernetesTokenAudiences.KUBERNETES_API),
                 Optional.ofNullable(System.getProperty(JWKS_VALID_INTERVAL_PROP))
                         .map(Duration::parse)
                         .orElse(JWKS_VALID_INTERVAL_DEFAULT)
         );
     }
 
-    K8sTokenVerifier(K8sOidcRestClient restClient, String audience, Supplier<String> oidcToken, Duration jwksValidInterval) {
+    KubernetesTokenVerifier(KubernetesOidcRestClient restClient, String audience, Supplier<String> oidcToken, Duration jwksValidInterval) {
         this.restClient = restClient;
         String issuer = this.getIssuerFromJwt(oidcToken.get());
         this.jwtClaimsParser = new JwtConsumerBuilder()
@@ -62,25 +62,25 @@ public class K8sTokenVerifier {
         this.jwksCache.set(fetchKeys());
     }
 
-    public JwtClaims verify(String token) throws K8sTokenVerificationException {
+    public JwtClaims verify(String token) throws KubernetesTokenVerificationException {
         try {
             JwtContext jwtContext = jwtClaimsParser.process(token);
             verifySignature(token, jwtContext);
             return jwtContext.getJwtClaims();
         } catch (InvalidJwtException e) {
-            throw new K8sTokenVerificationException("Failed to verify k8s token", e);
+            throw new KubernetesTokenVerificationException("Failed to verify k8s token", e);
         }
     }
 
-    private void verifySignature(String token, JwtContext jwtContext) throws K8sTokenVerificationException {
+    private void verifySignature(String token, JwtContext jwtContext) throws KubernetesTokenVerificationException {
         if (jwtContext.getJoseObjects().isEmpty())  {
-            throw new K8sTokenVerificationException("jwtContext is empty");
+            throw new KubernetesTokenVerificationException("jwtContext is empty");
         }
 
         String keyId = jwtContext.getJoseObjects().get(0).getKeyIdHeaderValue();
         var key = getJwk(keyId);
         if (key == null) {
-            throw new K8sTokenVerificationException("jwk not found");
+            throw new KubernetesTokenVerificationException("jwk not found");
         }
         JsonWebSignature jws = new JsonWebSignature();
         try {
@@ -88,10 +88,10 @@ public class K8sTokenVerifier {
             jws.setKey(key);
 
             if (!jws.verifySignature()) {
-                throw new K8sTokenVerificationException("jwt token has an invalid signature");
+                throw new KubernetesTokenVerificationException("jwt token has an invalid signature");
             }
         } catch (JoseException e) {
-            throw new K8sTokenVerificationException(e);
+            throw new KubernetesTokenVerificationException(e);
         }
     }
 

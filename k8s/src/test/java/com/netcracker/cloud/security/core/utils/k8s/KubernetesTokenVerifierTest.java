@@ -1,6 +1,6 @@
 package com.netcracker.cloud.security.core.utils.k8s;
 
-import com.netcracker.cloud.security.core.utils.k8s.impl.K8sOidcRestClient;
+import com.netcracker.cloud.security.core.utils.k8s.impl.KubernetesOidcRestClient;
 import org.jose4j.jwt.JwtClaims;
 import org.jose4j.jwt.NumericDate;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,12 +15,12 @@ import static org.mockito.Mockito.when;
 
 
 @ExtendWith(MockitoExtension.class)
-class K8sTokenVerifierTest {
+class KubernetesTokenVerifierTest {
     @Mock
-    K8sOidcRestClient restClient;
+    KubernetesOidcRestClient restClient;
     @Mock
     TokenSource tokenSource;
-    K8sTokenVerifier verifier;
+    KubernetesTokenVerifier verifier;
     TestJwtUtils jwtUtils;
 
     @BeforeEach
@@ -30,7 +30,7 @@ class K8sTokenVerifierTest {
         when(restClient.getOidcConfiguration(jwtUtils.getJwtIssuer())).thenReturn(jwtUtils.getJwksEndpoint());
         when(restClient.getJwks(jwtUtils.getJwksEndpoint())).thenReturn(jwtUtils.getJwks());
 
-        verifier = new K8sTokenVerifier(restClient, jwtUtils.getDbaasJwtAudience(), () -> jwtUtils.getDefaultClaimsJwt("test-namespace"), K8sTokenVerifier.JWKS_VALID_INTERVAL_DEFAULT);
+        verifier = new KubernetesTokenVerifier(restClient, jwtUtils.getDbaasJwtAudience(), () -> jwtUtils.getDefaultClaimsJwt("test-namespace"), KubernetesTokenVerifier.JWKS_VALID_INTERVAL_DEFAULT);
     }
 
     @Test
@@ -47,17 +47,17 @@ class K8sTokenVerifierTest {
             verifier.verify(jwtUtils.getJwt(validClaims, false));
         });
 
-        assertThrows(K8sTokenVerificationException.class, () -> {
+        assertThrows(KubernetesTokenVerificationException.class, () -> {
             verifier.verify(jwtUtils.getJwt(validClaims, true));
         });
 
-        assertThrows(K8sTokenVerificationException.class, () -> {
+        assertThrows(KubernetesTokenVerificationException.class, () -> {
             String jwt = jwtUtils.getJwt(validClaims, false);
             jwt += "tamperWithSignature";
             verifier.verify(jwt);
         });
 
-        assertThrows(K8sTokenVerificationException.class, () -> {
+        assertThrows(KubernetesTokenVerificationException.class, () -> {
             JwtClaims invalidClaims = new JwtClaims();
             validClaims.setIssuer("someOtherIssuer");
             validClaims.setAudience(jwtUtils.getDbaasJwtAudience());
@@ -69,7 +69,7 @@ class K8sTokenVerifierTest {
             verifier.verify(jwtUtils.getJwt(invalidClaims, false));
         });
 
-        assertThrows(K8sTokenVerificationException.class, () -> {
+        assertThrows(KubernetesTokenVerificationException.class, () -> {
             JwtClaims invalidClaims = new JwtClaims();
             validClaims.setIssuer(jwtUtils.getJwtIssuer());
             validClaims.setAudience("someOtherAudience");
@@ -81,7 +81,7 @@ class K8sTokenVerifierTest {
             verifier.verify(jwtUtils.getJwt(invalidClaims, false));
         });
 
-        assertThrows(K8sTokenVerificationException.class, () -> {
+        assertThrows(KubernetesTokenVerificationException.class, () -> {
             NumericDate invalidExpirationDate = NumericDate.now();
             invalidExpirationDate.addSeconds(-100);
 
@@ -95,5 +95,10 @@ class K8sTokenVerifierTest {
 
             verifier.verify(jwtUtils.getJwt(invalidClaims, false));
         });
+    }
+
+    @Test
+    void defaultConstructor() {
+        assertThrows(RuntimeException.class, () -> new KubernetesTokenVerifier("test-audience"));
     }
 }

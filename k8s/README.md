@@ -32,28 +32,28 @@ Add the dependency to your Maven project:
 
 #### How get a token?
 `getToken` is used for retrieving a Kubernetes projected volume token by audience.
-Only use predefined constants for audience argument. They are declared in the `K8sTokenAudiences` class.
-For example to get a token with audience `K8sTokenAudiences.NETRACKER` do the following:
+Only use predefined constants for audience argument. They are declared in the `KubernetesTokenAudiences` class.
+For example to get a token with audience `KubernetesTokenAudiences.NETRACKER` do the following:
 ```java
 import com.netcracker.cloud.security.core.utils.k8s.KubernetesTokenSource;
 
 public class Service {
 	public Data getData() {
-		String token = KubernetesTokenSource.getToken(K8sTokenAudiences.NETRACKER);
+		String token = KubernetesTokenSource.getToken(KubernetesTokenAudiences.NETRACKER);
 		return doRequestWithToken(token);
 	}
 }
 ```
 
 #### Audiences
-`K8sTokenAudiences` class has defined audiences for tokens.
+`KubernetesTokenAudiences` class has defined audiences for tokens.
 
 |Audience|Usage|
 |---|---|
-|`K8sTokenAudiences.NETCRACKER`|Requests to microservices withing the same namespace|
-|`K8sTokenAudiences.DBAAS`|Requests to Dbaas infra service|
-|`K8sTokenAudiences.MAAS`|Requests to Maas infra service|
-|`K8sTokenAudiences.KUBERNETES_API`|Requests to Kubernetes API|
+|`KubernetesTokenAudiences.NETCRACKER`|Requests to microservices withing the same namespace|
+|`KubernetesTokenAudiences.DBAAS`|Requests to Dbaas infra service|
+|`KubernetesTokenAudiences.MAAS`|Requests to Maas infra service|
+|`KubernetesTokenAudiences.KUBERNETES_API`|Requests to Kubernetes API|
 
 #### Configuration
 - Change the directory where tokens are located use property:
@@ -71,7 +71,9 @@ com.netcracker.cloud.security.kubernetes.tokens.polling.interval=2m
 - Provide your own implementation of `TokenSource`. For example if want to mock the behaviour of `KubernetesTokenSource` you can provide your own implementation.
 In `resources/META_INF/services/com.netcracker.cloud.security.core.utils.k8s.TokenSource` file place the path to the class that implements `TokenSource`. For example for class:
 ```java
-import path.to.package;
+package path.to.package;
+
+import com.netcracker.cloud.security.core.utils.k8s.Priority;
 
 @Priority(10)
 public class MockTokenSource {
@@ -86,21 +88,24 @@ path.to.package.MockTokenSourceImpl
 ```
 - Provide your own `ScheduledExecutorService` for `WatchingTokenSource`. Extend `WatchingTokenSource` and override the `getScheduledExecutorService` method.
 
-### K8sTokenVerifier
+### KubernetesTokenVerifier
 
 #### Verify tokens
-To authenticate incoming requests that use Kubernetes projected volume tokens use the `K8sTokenVerifier` class:
+To authenticate incoming requests that use Kubernetes projected volume tokens use the `KubernetesTokenVerifier` class:
+
 ```java
-import com.netcracker.cloud.security.core.utils.k8s.K8sTokenVerificationException;
-import com.netcracker.cloud.security.core.utils.k8s.K8sTokenVerifier;
+import com.netcracker.cloud.security.core.utils.k8s.KubernetesTokenVerificationException;
+import com.netcracker.cloud.security.core.utils.k8s.KubernetesTokenVerifier;
 
 public class ExampleAuthMiddleware {
-    private K8sTokenVerifier verifier;
+    private KubernetesTokenVerifier verifier;
+
     public ExampleAuthMiddleware() {
         // pass the audience you want the tokens to contain
-        this.verifier = new K8sTokenVerifier("audience");
+        this.verifier = new KubernetesTokenVerifier("audience");
     }
-    public void authenticate(String token) throws K8sTokenVerificationException {
+
+    public void authenticate(String token) throws KubernetesTokenVerificationException {
         verifier.verify(token);
     }
 }
@@ -108,7 +113,7 @@ public class ExampleAuthMiddleware {
 
 #### Configuration
 - Change valid duration of Json Web Keys from Kubernetes OIDC.
-`K8sTokenVerifier` fetches key to validate tokens from Kubernetes OIDC. They are periodically refreshed and only valid for a certain duration. To override use the config property:
+`KubernetesTokenVerifier` fetches key to validate tokens from Kubernetes OIDC. They are periodically refreshed and only valid for a certain duration. To override use the config property:
 ```text
 com.netcracker.cloud.security.kubernetes.jwks.valid-interval=12h
 ```

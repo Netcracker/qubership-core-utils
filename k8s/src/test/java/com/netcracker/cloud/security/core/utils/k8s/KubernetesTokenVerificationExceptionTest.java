@@ -4,12 +4,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class K8sTokenVerificationExceptionTest {
+class KubernetesTokenVerificationExceptionTest {
 
     @Test
     void testConstructorWithMessage() {
         String expectedMessage = "Token verification failed";
-        K8sTokenVerificationException exception = new K8sTokenVerificationException(expectedMessage);
+        KubernetesTokenVerificationException exception = new KubernetesTokenVerificationException(expectedMessage);
 
         assertEquals(expectedMessage, exception.getMessage());
         assertNull(exception.getCause());
@@ -19,7 +19,7 @@ class K8sTokenVerificationExceptionTest {
     void testConstructorWithMessageAndCause() {
         String expectedMessage = "Token verification failed";
         RuntimeException cause = new RuntimeException("Invalid token format");
-        K8sTokenVerificationException exception = new K8sTokenVerificationException(expectedMessage, cause);
+        KubernetesTokenVerificationException exception = new KubernetesTokenVerificationException(expectedMessage, cause);
 
         assertEquals(expectedMessage, exception.getMessage());
         assertSame(cause, exception.getCause());
@@ -29,7 +29,7 @@ class K8sTokenVerificationExceptionTest {
     @Test
     void testConstructorWithCause() {
         RuntimeException cause = new RuntimeException("Network error");
-        K8sTokenVerificationException exception = new K8sTokenVerificationException(cause);
+        KubernetesTokenVerificationException exception = new KubernetesTokenVerificationException(cause);
 
         assertSame(cause, exception.getCause());
         assertEquals("java.lang.RuntimeException: Network error", exception.getMessage());
@@ -37,14 +37,14 @@ class K8sTokenVerificationExceptionTest {
 
     @Test
     void testExceptionCanBeThrown() {
-        assertThrows(K8sTokenVerificationException.class, () -> {
-            throw new K8sTokenVerificationException("Test exception");
+        assertThrows(KubernetesTokenVerificationException.class, () -> {
+            throw new KubernetesTokenVerificationException("Test exception");
         });
     }
 
     @Test
     void testExceptionWithNullMessage() {
-        K8sTokenVerificationException exception = new K8sTokenVerificationException((String) null);
+        KubernetesTokenVerificationException exception = new KubernetesTokenVerificationException((String) null);
 
         assertNull(exception.getMessage());
         assertNull(exception.getCause());
@@ -52,7 +52,7 @@ class K8sTokenVerificationExceptionTest {
 
     @Test
     void testExceptionWithNullCause() {
-        K8sTokenVerificationException exception = new K8sTokenVerificationException((Throwable) null);
+        KubernetesTokenVerificationException exception = new KubernetesTokenVerificationException((Throwable) null);
 
         assertNull(exception.getCause());
     }
@@ -60,7 +60,7 @@ class K8sTokenVerificationExceptionTest {
     @Test
     void testExceptionWithMessageAndNullCause() {
         String expectedMessage = "Token expired";
-        K8sTokenVerificationException exception = new K8sTokenVerificationException(expectedMessage, null);
+        KubernetesTokenVerificationException exception = new KubernetesTokenVerificationException(expectedMessage, null);
 
         assertEquals(expectedMessage, exception.getMessage());
         assertNull(exception.getCause());
@@ -68,7 +68,7 @@ class K8sTokenVerificationExceptionTest {
 
     @Test
     void testExceptionInheritanceFromException() {
-        K8sTokenVerificationException exception = new K8sTokenVerificationException("Test");
+        KubernetesTokenVerificationException exception = new KubernetesTokenVerificationException("Test");
 
         assertInstanceOf(Exception.class, exception);
         assertInstanceOf(Throwable.class, exception);
@@ -78,7 +78,7 @@ class K8sTokenVerificationExceptionTest {
     void testExceptionWithNestedCause() {
         Exception rootCause = new IllegalArgumentException("Root cause");
         RuntimeException intermediateCause = new RuntimeException("Intermediate cause", rootCause);
-        K8sTokenVerificationException exception = new K8sTokenVerificationException("Top level message", intermediateCause);
+        KubernetesTokenVerificationException exception = new KubernetesTokenVerificationException("Top level message", intermediateCause);
 
         assertEquals("Top level message", exception.getMessage());
         assertSame(intermediateCause, exception.getCause());
@@ -87,7 +87,7 @@ class K8sTokenVerificationExceptionTest {
 
     @Test
     void testExceptionStackTrace() {
-        K8sTokenVerificationException exception = new K8sTokenVerificationException("Stack trace test");
+        KubernetesTokenVerificationException exception = new KubernetesTokenVerificationException("Stack trace test");
 
         assertNotNull(exception.getStackTrace());
         assertTrue(exception.getStackTrace().length > 0);

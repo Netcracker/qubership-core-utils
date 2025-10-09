@@ -18,7 +18,7 @@ import java.util.function.Supplier;
 import static java.net.HttpURLConnection.HTTP_OK;
 
 @Slf4j
-public class K8sOidcRestClient {
+public class KubernetesOidcRestClient {
     private static final int RETRY_POLICY_BACKOFF_MAX_ATTEMPTS = 5;
     private static final Duration RETRY_POLICY_BACKOFF_DELAY = Duration.ofMillis(500);
     private static final Duration RETRY_POLICY_BACKOFF_MAX_DELAY = Duration.ofSeconds(15);
@@ -33,7 +33,7 @@ public class K8sOidcRestClient {
     private final HttpClient client = HttpClient.newHttpClient();
     private final Supplier<String> tokenSupplier;
 
-    public K8sOidcRestClient(Supplier<String> tokenSupplier) {
+    public KubernetesOidcRestClient(Supplier<String> tokenSupplier) {
         this.tokenSupplier = tokenSupplier;
     }
 
