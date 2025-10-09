@@ -9,6 +9,11 @@
 
 **Core Utils** library provides common functionality for Java based microservices
 
+## Requirements
+
+- Java 17+
+- Maven 3.x
+
 ## Packages
 
 |Package|Description|Documentation|

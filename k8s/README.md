@@ -1,6 +1,6 @@
-# Core Utils - TLS Utilities
+# Core Utils - Kubernetes projected volume token utilities
 
-A lightweight Java library providing support for providing and verifying Kubernetes projected volume tokens.
+A lightweight Java library providing support for working with Kubernetes projected volume tokens.
 
 ## Features
 
@@ -9,11 +9,6 @@ A lightweight Java library providing support for providing and verifying Kuberne
 - Customizable via SPI
 - Make OIDC discovery to Kubernetes OIDC provider and verify projected volume tokens from Kubernetes
 - Cache verification keys and refetch when KID from the token is not found in the cache
-
-## Requirements
-
-- Java 17+
-- Maven 3.x
 
 ## Installation
 
@@ -45,6 +40,19 @@ public class Service {
 }
 ```
 
+#### How get the default Kubernetes service account token?
+If you want to make requests to Kubernetes API and need to get the default service account token use the `KubernetesDefaultToken` class:
+```java
+import com.netcracker.cloud.security.core.utils.k8s.KubernetesTokenSource;
+
+public class Service {
+	public Data getData() {
+		String token = KubernetesDefaultToken.getToken();
+		return doRequestToKubernetesApi(token);
+	}
+}
+```
+
 #### Audiences
 `KubernetesTokenAudiences` class has defined audiences for tokens.
 
@@ -53,14 +61,13 @@ public class Service {
 |`KubernetesTokenAudiences.NETCRACKER`|Requests to microservices withing the same namespace|
 |`KubernetesTokenAudiences.DBAAS`|Requests to Dbaas infra service|
 |`KubernetesTokenAudiences.MAAS`|Requests to Maas infra service|
-|`KubernetesTokenAudiences.KUBERNETES_API`|Requests to Kubernetes API|
 
 #### Configuration
 - Change the directory where tokens are located use property:
 ```text
 com.netcracker.cloud.security.kubernetes.tokens.dir=/path/to/directory
 ```
-- Change the directory where kubernetes api token is located use property:
+- Change the directory where default Kubernetes service account is located use property:
 ```text
 com.netcracker.cloud.security.kubernetes.serviceaccount.dir=/path/to/directory
 ```

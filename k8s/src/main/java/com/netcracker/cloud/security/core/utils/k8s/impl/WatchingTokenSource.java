@@ -8,13 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
 import java.nio.file.*;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static java.time.temporal.ChronoUnit.NANOS;
 
 @Slf4j
 @Priority(0)
@@ -80,11 +77,5 @@ public class WatchingTokenSource  implements TokenSource {
                 audience,
                 Try.of(() -> Files.readString(tokenDir.resolve("token")))
         );
-    }
-
-    @Override
-    public void close() throws Exception {
-        log.info("Stop scheduler");
-        watcher.close();
     }
 }

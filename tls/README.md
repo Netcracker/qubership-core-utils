@@ -14,11 +14,6 @@ A lightweight Java library providing TLS (Transport Layer Security) configuratio
   - Token management with type, value and expiration tracking
 - Service Provider Interface (SPI) for extensibility
 
-## Requirements
-
-- Java 17+
-- Maven 3.x
-
 ## Installation
 
 Add the dependency to your Maven project:

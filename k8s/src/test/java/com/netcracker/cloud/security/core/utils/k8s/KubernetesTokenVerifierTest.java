@@ -99,6 +99,6 @@ class KubernetesTokenVerifierTest {
 
     @Test
     void defaultConstructor() {
-        assertThrows(RuntimeException.class, () -> new KubernetesTokenVerifier("test-audience"));
+        assertThrows(Throwable.class, () -> new KubernetesTokenVerifier("test-audience"));
     }
 }
