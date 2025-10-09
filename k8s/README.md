@@ -93,7 +93,6 @@ Place following in `resources/META_INF/services/com.netcracker.cloud.security.co
 ```text
 path.to.package.MockTokenSourceImpl
 ```
-- Provide your own `ScheduledExecutorService` for `WatchingTokenSource`. Extend `WatchingTokenSource` and override the `getScheduledExecutorService` method.
 
 ### KubernetesTokenVerifier
 
