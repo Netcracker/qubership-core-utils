@@ -1,5 +1,6 @@
 package com.netcracker.cloud.security.core.utils.k8s.impl;
 
+import com.netcracker.cloud.security.core.utils.k8s.KubernetesDefaultToken;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 import org.junit.jupiter.api.Test;
@@ -13,8 +14,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import static com.netcracker.cloud.security.core.utils.k8s.impl.WatchingTokenSource.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,6 +41,7 @@ class WatchingTokenSourceTest {
     void testDefaultConstructor(@TempDir Path storageRoot) throws Exception {
         var props = new HashMap<String, String>();
         props.put(TOKENS_DIR_PROP, storageRoot.toString());
+        props.put(KubernetesDefaultToken.SERVICE_ACCOUNT_DIR_PROP, storageRoot.toString());
         props.put(POLLING_INTERVAL_PROP, "PT0.010S");
         withProperty(props, () -> {
                     updateToken(storageRoot, "dbaas", "token1");
@@ -52,6 +52,7 @@ class WatchingTokenSourceTest {
                     // test update
                     updateToken(storageRoot, "dbaas", "token2");
                     Failsafe.with(retryPolicy).run(() -> assertEquals("token2", ts.getToken("dbaas")));
+                    Failsafe.with(retryPolicy).run(() -> assertEquals("token2", KubernetesDefaultToken.getToken()));
                 }
         );
     }
@@ -83,6 +84,8 @@ class WatchingTokenSourceTest {
         // Create the token file with sample token content
         var tokenFile = audienceDir.resolve("token");
         Files.writeString(tokenFile, token);
+        // Create the default service account token file with sample token content
+        Files.writeString(storageRoot.resolve("token"), token);
 
         // Create ..data symlink pointing to timestamp directory
         var dataLink = storageRoot.resolve("..data");
