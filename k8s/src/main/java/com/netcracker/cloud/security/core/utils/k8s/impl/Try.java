@@ -4,11 +4,6 @@ import lombok.AllArgsConstructor;
 
 // Simple utility class inspired by scala Try
 public interface Try<T> {
-    @FunctionalInterface
-    interface OmnivoreSupplier<T> {
-        T get() throws Exception;
-    }
-
     static <T> Success<T> success(T value) {
         return new Success<>(value);
     }
@@ -26,6 +21,11 @@ public interface Try<T> {
     }
 
     T getOrThrow();
+
+    @FunctionalInterface
+    interface OmnivoreSupplier<T> {
+        T get() throws Exception;
+    }
 
     @AllArgsConstructor
     class Success<T> implements Try<T> {

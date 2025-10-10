@@ -62,8 +62,9 @@ public class KubernetesTokenVerifier {
         this.jwksCache.set(fetchKeys());
     }
 
-	/**
+    /**
      * verify method verifies the given token with JWKS obtained from Kubernetes OIDC. It verifies the signature and checks if token claims are valid
+     *
      * @param token is the token to be validated
      * @return claims of the token if the token is valid
      * @throws KubernetesTokenVerificationException is thrown when the token has an invalid signature or invalid claims
@@ -79,7 +80,7 @@ public class KubernetesTokenVerifier {
     }
 
     private void verifySignature(String token, JwtContext jwtContext) throws KubernetesTokenVerificationException {
-        if (jwtContext.getJoseObjects().isEmpty())  {
+        if (jwtContext.getJoseObjects().isEmpty()) {
             throw new KubernetesTokenVerificationException("jwtContext is empty");
         }
 
@@ -121,7 +122,7 @@ public class KubernetesTokenVerifier {
         if (key != null) {
             return key;
         }
-        synchronized(jwksCache) {
+        synchronized (jwksCache) {
             key = getJwkFromCache(keyId);
             if (key != null) {
                 return key;
@@ -132,7 +133,7 @@ public class KubernetesTokenVerifier {
     }
 
     private Key getJwkFromCache(String keyId) {
-        if(jwksExpiration.get().isBefore(Instant.now())) {
+        if (jwksExpiration.get().isBefore(Instant.now())) {
             return null;
         }
         return jwksCache.get().get(keyId);

@@ -57,7 +57,7 @@ public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
                 for (WatchEvent<?> event : key.pollEvents()) {
                     log.debug("Watch event received: {}", event.context());
                     if (event.kind() == StandardWatchEventKinds.ENTRY_CREATE && (event.context() instanceof Path)) {
-                        var entityPath = (Path)event.context();
+                        var entityPath = (Path) event.context();
                         if (entityPath.endsWith(UPDATE_MARKER)) {
                             needUpdate = true;
                             // do not break loop here because we need to process all events from

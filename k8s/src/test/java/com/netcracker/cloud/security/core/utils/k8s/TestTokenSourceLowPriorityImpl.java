@@ -8,5 +8,6 @@ public class TestTokenSourceLowPriorityImpl implements TokenSource {
     }
 
     @Override
-    public void close() {}
+    public void close() {
+    }
 }

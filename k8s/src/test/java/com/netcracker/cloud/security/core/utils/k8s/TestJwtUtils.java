@@ -22,9 +22,9 @@ public class TestJwtUtils {
     private final String jwksEndpoint = "https://kubernetes.default.svc.cluster.local/openid/v1/jwks";
     @Getter
     private final String dbaasJwtAudience = "dbaas";
+    private final RsaJsonWebKey rsaJsonWebKey;
     @Getter
     private String jwks;
-    private final RsaJsonWebKey rsaJsonWebKey;
 
     public TestJwtUtils() throws JoseException {
         rsaJsonWebKey = RsaJwkGenerator.generateJwk(2048);
@@ -53,7 +53,7 @@ public class TestJwtUtils {
     }
 
     @SneakyThrows
-    public String getDefaultClaimsJwt(String namespace)  {
+    public String getDefaultClaimsJwt(String namespace) {
         JwtClaims validClaims = new JwtClaims();
         validClaims.setIssuer(jwtIssuer);
         validClaims.setAudience(dbaasJwtAudience);

@@ -30,7 +30,9 @@ class TryTest {
     @Test
     void testOfFailure() {
         assertThrows(RuntimeException.class, () ->
-                Try.of(() -> { throw new RuntimeException("Oops"); }).getOrThrow()
+                Try.of(() -> {
+                    throw new RuntimeException("Oops");
+                }).getOrThrow()
         );
     }
 }

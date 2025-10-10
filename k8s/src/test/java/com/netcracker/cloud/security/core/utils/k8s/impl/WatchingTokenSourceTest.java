@@ -15,8 +15,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.netcracker.cloud.security.core.utils.k8s.impl.WatchingTokenSource.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static com.netcracker.cloud.security.core.utils.k8s.impl.WatchingTokenSource.POLLING_INTERVAL_PROP;
+import static com.netcracker.cloud.security.core.utils.k8s.impl.WatchingTokenSource.TOKENS_DIR_PROP;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class WatchingTokenSourceTest {
 
@@ -29,7 +30,7 @@ class WatchingTokenSourceTest {
         var interval = Duration.ofMillis(10);
         updateToken(storageRoot, "dbaas", "token1");
 
-        try(var ts = new WatchingTokenSource(storageRoot, interval, KubernetesProjectedVolumeWatcher.EXECUTOR)) {
+        try (var ts = new WatchingTokenSource(storageRoot, interval, KubernetesProjectedVolumeWatcher.EXECUTOR)) {
             assertEquals("token1", ts.getToken("dbaas"));
 
             // test update
@@ -47,7 +48,7 @@ class WatchingTokenSourceTest {
         withProperty(props, () -> {
                     updateToken(storageRoot, "dbaas", "token1");
 
-                    try(var ts = new WatchingTokenSource()) {
+                    try (var ts = new WatchingTokenSource()) {
                         assertEquals("token1", ts.getToken("dbaas"));
                         Failsafe.with(retryPolicy).run(() -> assertEquals("token1", KubernetesDefaultToken.getToken()));
 
@@ -123,7 +124,7 @@ class WatchingTokenSourceTest {
     }
 
     @FunctionalInterface
-    interface OmnivoreRunnable  {
+    interface OmnivoreRunnable {
         void run() throws Exception;
     }
 }

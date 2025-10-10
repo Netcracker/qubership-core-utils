@@ -19,9 +19,9 @@ public class KubernetesTokenSource {
 
         var instance = loader.stream()
                 .map(source ->
-                    new TokenImplementation(
-                            Optional.of(source.type().getAnnotation(Priority.class)).map(Priority::value).orElse(0),
-                            source
+                        new TokenImplementation(
+                                Optional.of(source.type().getAnnotation(Priority.class)).map(Priority::value).orElse(0),
+                                source
                         )
                 )
                 .peek(s -> log.info("Found TokenSource implementation: {}, priority: {}", s.getProvider().type(), s.getPriority()))
@@ -40,7 +40,7 @@ public class KubernetesTokenSource {
 
     @Value
     private static class TokenImplementation {
-        int  priority;
+        int priority;
         ServiceLoader.Provider<TokenSource> provider;
     }
 }

@@ -6,16 +6,20 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
 @Priority(0)
-public class WatchingTokenSource  implements TokenSource {
+public class WatchingTokenSource implements TokenSource {
     public static final String TOKENS_DIR_PROP = "com.netcracker.cloud.security.kubernetes.tokens.dir";
     public static final Path TOKENS_DIR_DEFAULT = Paths.get("/var/run/secrets/tokens");
 
@@ -48,8 +52,9 @@ public class WatchingTokenSource  implements TokenSource {
         this.watcher = new KubernetesProjectedVolumeWatcher(storageRoot, interval, scheduler, this::updateCache);
     }
 
-	/**
+    /**
      * getToken method returns the corresponding Kubernetes projected volume token string by audience
+     *
      * @param audience is the audience of the token to be returned
      * @return Kubernetes projected volume token string
      */
@@ -74,7 +79,7 @@ public class WatchingTokenSource  implements TokenSource {
                         refreshToken(audience, storageRoot.resolve(audience));
                     });
         } catch (IOException e) {
-            log.error("Cannot list folder: {}",  storageRoot);
+            log.error("Cannot list folder: {}", storageRoot);
         }
     }
 

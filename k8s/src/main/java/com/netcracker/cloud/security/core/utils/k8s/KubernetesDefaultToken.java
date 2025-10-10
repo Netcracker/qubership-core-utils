@@ -20,7 +20,11 @@ public class KubernetesDefaultToken {
     private static final Duration interval = Optional.ofNullable(System.getProperty(POLLING_INTERVAL_PROP))
             .map(Duration::parse)
             .orElse(POLLING_INTERVAL_DEFAULT);
-
+    private static final KubernetesProjectedVolumeWatcher watcher = new KubernetesProjectedVolumeWatcher(
+            getStorageRoot(),
+            interval,
+            KubernetesProjectedVolumeWatcher.EXECUTOR,
+            KubernetesDefaultToken::updateCache);
     private static final AtomicReference<Try<String>> token = new AtomicReference<>();
 
     private static Path getStorageRoot() {
@@ -29,14 +33,9 @@ public class KubernetesDefaultToken {
                 .orElse(SERVICE_ACCOUNT_DIR_DEFAULT);
     }
 
-    private static final KubernetesProjectedVolumeWatcher watcher = new KubernetesProjectedVolumeWatcher(
-                getStorageRoot(),
-                interval,
-                KubernetesProjectedVolumeWatcher.EXECUTOR,
-                KubernetesDefaultToken::updateCache);
-
-	/**
+    /**
      * getToken is used for getting a token to use in requests to Kubernetes API
+     *
      * @return the default Kubernetes service account token string
      */
     public static String getToken() {
