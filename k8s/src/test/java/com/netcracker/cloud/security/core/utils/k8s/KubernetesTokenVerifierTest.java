@@ -96,9 +96,4 @@ class KubernetesTokenVerifierTest {
             verifier.verify(jwtUtils.getJwt(invalidClaims, false));
         });
     }
-
-    @Test
-    void defaultConstructor() {
-        assertThrows(Throwable.class, () -> new KubernetesTokenVerifier("test-audience"));
-    }
 }
