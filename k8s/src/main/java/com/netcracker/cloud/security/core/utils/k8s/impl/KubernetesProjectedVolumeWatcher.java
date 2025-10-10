@@ -86,5 +86,6 @@ public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
     public void close() {
         log.info("Watcher closed for: {}", storageRoot);
         scheduledEventsPollTask.cancel(false);
+        watchService.close();;
     }
 }
