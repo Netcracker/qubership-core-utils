@@ -27,6 +27,11 @@ public class KubernetesDefaultToken {
 
     private static final AtomicReference<Try<String>> token = new AtomicReference<>();
 
+    static {
+        System.out.println("hello");
+        System.out.println(storageRoot);
+    }
+
     private static final KubernetesProjectedVolumeWatcher watcher = new KubernetesProjectedVolumeWatcher(
                 storageRoot,
                 interval,
