@@ -9,11 +9,13 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.netcracker.cloud.security.core.utils.k8s.impl.WatchingTokenSource.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -46,7 +48,10 @@ class WatchingTokenSourceTest {
         props.put(POLLING_INTERVAL_PROP, "PT0.010S");
         withProperty(props, () -> {
                     System.out.println("inside with property");
-                    System.out.println(KubernetesDefaultToken.getStorageRoot());
+                    System.out.println(System.getProperty("com.netcracker.cloud.security.kubernetes.serviceaccount.dir"));
+                    System.out.println(Optional.ofNullable(System.getProperty(KubernetesDefaultToken.SERVICE_ACCOUNT_DIR_PROP))
+                .map(Paths::get)
+                .orElse(KubernetesDefaultToken.SERVICE_ACCOUNT_DIR_DEFAULT));
                     updateToken(storageRoot, "dbaas", "token1");
 
                     try(var ts = new WatchingTokenSource()) {

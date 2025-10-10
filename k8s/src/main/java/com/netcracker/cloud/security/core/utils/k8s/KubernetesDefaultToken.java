@@ -29,11 +29,6 @@ public class KubernetesDefaultToken {
                 .orElse(SERVICE_ACCOUNT_DIR_DEFAULT);
     }
 
-    static {
-        System.out.println("hello");
-        System.out.println(getStorageRoot());
-    }
-
     private static final KubernetesProjectedVolumeWatcher watcher = new KubernetesProjectedVolumeWatcher(
                 getStorageRoot(),
                 interval,
