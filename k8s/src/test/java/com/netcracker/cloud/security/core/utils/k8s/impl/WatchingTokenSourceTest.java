@@ -45,6 +45,8 @@ class WatchingTokenSourceTest {
         props.put("com.netcracker.cloud.security.kubernetes.serviceaccount.dir", storageRoot.toString());
         props.put(POLLING_INTERVAL_PROP, "PT0.010S");
         withProperty(props, () -> {
+                    System.out.println("inside with property");
+                    System.out.println(KubernetesDefaultToken.getStorageRoot());
                     updateToken(storageRoot, "dbaas", "token1");
 
                     try(var ts = new WatchingTokenSource()) {
@@ -107,12 +109,18 @@ class WatchingTokenSourceTest {
         var previousValues = new HashMap<String, String>();
         properties.forEach((name, value) -> {
             previousValues.put(name, System.getProperty(name));
+            System.out.println("set property");
+            System.out.println(name);
+            System.out.println(value);
             System.setProperty(name, value);
         });
         try {
             runnable.run();
         } finally {
             previousValues.forEach((name, previousValue) -> {
+                System.out.println("return property");
+                System.out.println(name);
+                System.out.println(previousValue);
                 if (previousValue != null) {
                     System.setProperty(name, previousValue);
                 } else {
