@@ -36,7 +36,8 @@ public class KubernetesDefaultToken {
                 KubernetesDefaultToken::updateCache);
 
 	/**
-     * getToken method returns the default Kubernetes service account token string
+     * getToken is used for getting a token to use in requests to Kubernetes API
+     * @return the default Kubernetes service account token string
      */
     public static String getToken() {
         return token.get().getOrThrow();

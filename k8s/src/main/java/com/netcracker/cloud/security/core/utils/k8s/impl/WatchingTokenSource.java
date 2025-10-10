@@ -50,6 +50,8 @@ public class WatchingTokenSource  implements TokenSource {
 
 	/**
      * getToken method returns the corresponding Kubernetes projected volume token string by audience
+     * @param audience is the audience of the token to be returned
+     * @return Kubernetes projected volume token string
      */
     @Override
     public String getToken(String audience) {

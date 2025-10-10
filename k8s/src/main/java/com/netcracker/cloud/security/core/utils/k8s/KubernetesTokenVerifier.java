@@ -63,7 +63,10 @@ public class KubernetesTokenVerifier {
     }
 
 	/**
-     * verify method verifies the given token with JWKS obtained from Kubernetes OIDC. It verifies the signature and checks if token claims are valid. If the token is valid token's claims are returned. Otherwise exception is thrown
+     * verify method verifies the given token with JWKS obtained from Kubernetes OIDC. It verifies the signature and checks if token claims are valid
+     * @param token is the token to be validated
+     * @return claims of the token if the token is valid
+     * @throws KubernetesTokenVerificationException is thrown when the token has an invalid signature or invalid claims
      */
     public JwtClaims verify(String token) throws KubernetesTokenVerificationException {
         try {

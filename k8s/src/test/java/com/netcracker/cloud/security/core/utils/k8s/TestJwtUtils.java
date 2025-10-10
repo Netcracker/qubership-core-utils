@@ -23,7 +23,7 @@ public class TestJwtUtils {
     @Getter
     private final String dbaasJwtAudience = "dbaas";
     @Getter
-    private final String jwks;
+    private String jwks;
     private final RsaJsonWebKey rsaJsonWebKey;
 
     public TestJwtUtils() throws JoseException {
@@ -38,7 +38,8 @@ public class TestJwtUtils {
         RsaJsonWebKey key;
         if (differentKey) {
             key = RsaJwkGenerator.generateJwk(2048);
-            key.setKeyId("k1");
+            key.setKeyId("k2");
+            jwks = new JsonWebKeySet(key).toJson();
         } else {
             key = rsaJsonWebKey;
         }
