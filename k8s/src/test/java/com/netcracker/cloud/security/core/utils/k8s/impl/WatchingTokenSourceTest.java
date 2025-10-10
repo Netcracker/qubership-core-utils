@@ -42,7 +42,7 @@ class WatchingTokenSourceTest {
     void testDefaultConstructor(@TempDir Path storageRoot) throws Exception {
         var props = new HashMap<String, String>();
         props.put(TOKENS_DIR_PROP, storageRoot.toString());
-        props.put(KubernetesDefaultToken.SERVICE_ACCOUNT_DIR_PROP, storageRoot.toString());
+        props.put("com.netcracker.cloud.security.kubernetes.serviceaccount.dir", storageRoot.toString());
         props.put(POLLING_INTERVAL_PROP, "PT0.010S");
         withProperty(props, () -> {
                     updateToken(storageRoot, "dbaas", "token1");
