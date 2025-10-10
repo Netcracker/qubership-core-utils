@@ -35,6 +35,7 @@ public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
         this.cacheUpdate = cacheUpdate;
 
         watchService = FileSystems.getDefault().newWatchService();
+        log.info("Register {} in watch service", storageRoot);
         this.storageRoot.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
 
         log.info("Start watcher for: {}", storageRoot);
