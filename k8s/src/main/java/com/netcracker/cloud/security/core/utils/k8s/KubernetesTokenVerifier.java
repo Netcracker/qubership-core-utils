@@ -37,9 +37,9 @@ public class KubernetesTokenVerifier {
 
     public KubernetesTokenVerifier(String jwtAudience) {
         this(
-                new KubernetesOidcRestClient(KubernetesDefaultToken::getToken),
+                new KubernetesOidcRestClient(KubernetesServiceAccountToken::getToken),
                 jwtAudience,
-                KubernetesDefaultToken::getToken,
+                KubernetesServiceAccountToken::getToken,
                 Optional.ofNullable(System.getProperty(JWKS_VALID_INTERVAL_PROP))
                         .map(Duration::parse)
                         .orElse(JWKS_VALID_INTERVAL_DEFAULT)

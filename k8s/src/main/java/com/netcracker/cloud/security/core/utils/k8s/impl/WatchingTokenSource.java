@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 @Slf4j
 @Priority(0)
 public class WatchingTokenSource implements TokenSource {
+
     public static final String TOKENS_DIR_PROP = "com.netcracker.cloud.security.kubernetes.tokens.dir";
     public static final Path TOKENS_DIR_DEFAULT = Paths.get("/var/run/secrets/tokens");
 

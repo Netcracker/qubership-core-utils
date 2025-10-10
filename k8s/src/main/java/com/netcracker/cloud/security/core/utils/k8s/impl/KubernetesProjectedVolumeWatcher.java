@@ -3,7 +3,12 @@ package com.netcracker.cloud.security.core.utils.k8s.impl;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.nio.file.*;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Executors;
@@ -77,8 +82,10 @@ public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
     }
 
     @Override
+    @SneakyThrows
     public void close() {
         log.info("Watcher closed for: {}", storageRoot);
         scheduledEventsPollTask.cancel(false);
+        watchService.close();
     }
 }

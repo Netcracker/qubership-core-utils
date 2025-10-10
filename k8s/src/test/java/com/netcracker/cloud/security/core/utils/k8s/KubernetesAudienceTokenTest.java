@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class KubernetesTokenSourceTest {
+class KubernetesAudienceTokenTest {
     @Test
     void getToken() {
-        assertEquals("test-token", KubernetesTokenSource.getToken("never-mind"));
+        assertEquals("test-token", KubernetesAudienceToken.getToken("never-mind"));
     }
 }

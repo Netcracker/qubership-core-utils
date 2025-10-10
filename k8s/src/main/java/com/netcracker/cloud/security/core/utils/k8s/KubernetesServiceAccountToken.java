@@ -2,6 +2,8 @@ package com.netcracker.cloud.security.core.utils.k8s;
 
 import com.netcracker.cloud.security.core.utils.k8s.impl.KubernetesProjectedVolumeWatcher;
 import com.netcracker.cloud.security.core.utils.k8s.impl.Try;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,12 +12,14 @@ import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class KubernetesDefaultToken {
-    public static final String SERVICE_ACCOUNT_DIR_PROP = "com.netcracker.cloud.security.kubernetes.serviceaccount.dir";
-    public static final Path SERVICE_ACCOUNT_DIR_DEFAULT = Paths.get("/var/run/secrets/kubernetes.io/serviceaccount");
+import static com.netcracker.cloud.security.core.utils.k8s.impl.WatchingTokenSource.POLLING_INTERVAL_DEFAULT;
+import static com.netcracker.cloud.security.core.utils.k8s.impl.WatchingTokenSource.POLLING_INTERVAL_PROP;
 
-    public static final String POLLING_INTERVAL_PROP = "com.netcracker.cloud.security.kubernetes.tokens.polling.interval";
-    public static final Duration POLLING_INTERVAL_DEFAULT = Duration.ofMinutes(1);
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class KubernetesServiceAccountToken {
+
+    public static final String SERVICE_ACCOUNT_DIR_PROP = "com.netcracker.cloud.security.kubernetes.service.account.token.dir";
+    public static final Path SERVICE_ACCOUNT_DIR_DEFAULT = Paths.get("/var/run/secrets/kubernetes.io/serviceaccount");
 
     private static final Duration interval = Optional.ofNullable(System.getProperty(POLLING_INTERVAL_PROP))
             .map(Duration::parse)
@@ -25,7 +29,7 @@ public class KubernetesDefaultToken {
             getStorageRoot(),
             interval,
             KubernetesProjectedVolumeWatcher.EXECUTOR,
-            KubernetesDefaultToken::updateCache);
+            KubernetesServiceAccountToken::updateCache);
 
     private static Path getStorageRoot() {
         return Optional.ofNullable(System.getProperty(SERVICE_ACCOUNT_DIR_PROP))

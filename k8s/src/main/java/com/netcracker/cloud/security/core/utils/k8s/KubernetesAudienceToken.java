@@ -1,5 +1,7 @@
 package com.netcracker.cloud.security.core.utils.k8s;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 
@@ -8,11 +10,10 @@ import java.util.Optional;
 import java.util.ServiceLoader;
 
 @Slf4j
-public class KubernetesTokenSource {
-    private static final TokenSource INSTANCE = getInstance();
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class KubernetesAudienceToken {
 
-    private KubernetesTokenSource() {
-    }
+    private static final TokenSource INSTANCE = getInstance();
 
     private static TokenSource getInstance() {
         ServiceLoader<TokenSource> loader = ServiceLoader.load(TokenSource.class);

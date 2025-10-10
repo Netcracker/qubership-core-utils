@@ -1,6 +1,6 @@
 package com.netcracker.cloud.security.core.utils.k8s.impl;
 
-import com.netcracker.cloud.security.core.utils.k8s.KubernetesDefaultToken;
+import com.netcracker.cloud.security.core.utils.k8s.KubernetesServiceAccountToken;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 import org.junit.jupiter.api.Test;
@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.netcracker.cloud.security.core.utils.k8s.KubernetesServiceAccountToken.SERVICE_ACCOUNT_DIR_PROP;
 import static com.netcracker.cloud.security.core.utils.k8s.impl.WatchingTokenSource.POLLING_INTERVAL_PROP;
 import static com.netcracker.cloud.security.core.utils.k8s.impl.WatchingTokenSource.TOKENS_DIR_PROP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,19 +44,19 @@ class WatchingTokenSourceTest {
     void testDefaultConstructor(@TempDir Path storageRoot) throws Exception {
         var props = new HashMap<String, String>();
         props.put(TOKENS_DIR_PROP, storageRoot.toString());
-        props.put("com.netcracker.cloud.security.kubernetes.serviceaccount.dir", storageRoot.toString());
+        props.put(SERVICE_ACCOUNT_DIR_PROP, storageRoot.toString());
         props.put(POLLING_INTERVAL_PROP, "PT0.010S");
         withProperty(props, () -> {
                     updateToken(storageRoot, "dbaas", "token1");
 
                     try (var ts = new WatchingTokenSource()) {
                         assertEquals("token1", ts.getToken("dbaas"));
-                        Failsafe.with(retryPolicy).run(() -> assertEquals("token1", KubernetesDefaultToken.getToken()));
+                        Failsafe.with(retryPolicy).run(() -> assertEquals("token1", KubernetesServiceAccountToken.getToken()));
 
                         // test update
                         updateToken(storageRoot, "dbaas", "token2");
                         Failsafe.with(retryPolicy).run(() -> assertEquals("token2", ts.getToken("dbaas")));
-                        Failsafe.with(retryPolicy).run(() -> assertEquals("token2", KubernetesDefaultToken.getToken()));
+                        Failsafe.with(retryPolicy).run(() -> assertEquals("token2", KubernetesServiceAccountToken.getToken()));
                     }
                 }
         );
