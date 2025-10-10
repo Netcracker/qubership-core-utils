@@ -17,10 +17,6 @@ public class KubernetesDefaultToken {
     public static final String POLLING_INTERVAL_PROP = "com.netcracker.cloud.security.kubernetes.tokens.polling.interval";
     public static final Duration POLLING_INTERVAL_DEFAULT = Duration.ofMinutes(1);
 
-    private static final Path storageRoot = Optional.ofNullable(System.getProperty(SERVICE_ACCOUNT_DIR_PROP))
-            .map(Paths::get)
-            .orElse(SERVICE_ACCOUNT_DIR_DEFAULT);
-
     private static final Duration interval = Optional.ofNullable(System.getProperty(POLLING_INTERVAL_PROP))
             .map(Duration::parse)
             .orElse(POLLING_INTERVAL_DEFAULT);
@@ -29,11 +25,17 @@ public class KubernetesDefaultToken {
 
     static {
         System.out.println("hello");
-        System.out.println(storageRoot);
+        System.out.println(getStorageRoot());
+    }
+
+    private static Path getStorageRoot() {
+        return Optional.ofNullable(System.getProperty(SERVICE_ACCOUNT_DIR_PROP))
+                .map(Paths::get)
+                .orElse(SERVICE_ACCOUNT_DIR_DEFAULT);
     }
 
     private static final KubernetesProjectedVolumeWatcher watcher = new KubernetesProjectedVolumeWatcher(
-                storageRoot,
+                getStorageRoot(),
                 interval,
                 KubernetesProjectedVolumeWatcher.EXECUTOR,
                 KubernetesDefaultToken::updateCache);
