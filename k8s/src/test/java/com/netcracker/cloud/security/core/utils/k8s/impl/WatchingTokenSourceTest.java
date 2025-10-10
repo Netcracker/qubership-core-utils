@@ -49,6 +49,7 @@ class WatchingTokenSourceTest {
 
                     try(var ts = new WatchingTokenSource()) {
                         assertEquals("token1", ts.getToken("dbaas"));
+                        Failsafe.with(retryPolicy).run(() -> assertEquals("token1", KubernetesDefaultToken.getToken()));
 
                         // test update
                         updateToken(storageRoot, "dbaas", "token2");
