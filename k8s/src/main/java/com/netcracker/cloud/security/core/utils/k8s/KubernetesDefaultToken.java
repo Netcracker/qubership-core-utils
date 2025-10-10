@@ -20,12 +20,12 @@ public class KubernetesDefaultToken {
     private static final Duration interval = Optional.ofNullable(System.getProperty(POLLING_INTERVAL_PROP))
             .map(Duration::parse)
             .orElse(POLLING_INTERVAL_DEFAULT);
+    private static final AtomicReference<Try<String>> token = new AtomicReference<>();
     private static final KubernetesProjectedVolumeWatcher watcher = new KubernetesProjectedVolumeWatcher(
             getStorageRoot(),
             interval,
             KubernetesProjectedVolumeWatcher.EXECUTOR,
             KubernetesDefaultToken::updateCache);
-    private static final AtomicReference<Try<String>> token = new AtomicReference<>();
 
     private static Path getStorageRoot() {
         return Optional.ofNullable(System.getProperty(SERVICE_ACCOUNT_DIR_PROP))

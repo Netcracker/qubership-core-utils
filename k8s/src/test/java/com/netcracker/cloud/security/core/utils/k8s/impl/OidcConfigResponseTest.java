@@ -1,7 +1,10 @@
 package com.netcracker.cloud.security.core.utils.k8s.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.Assert.assertEquals;
 
 class OidcConfigResponseTest {
     @Test
@@ -13,6 +16,6 @@ class OidcConfigResponseTest {
                 + "\"subject_types_supported\":[\"public\"],"
                 + "\"id_token_signing_alg_values_supported\":[\"RS256\"]}";
 
-        assertEquals("https://192.168.49.2:8443/openid/v1/jwks", mapper.readValue(json, OidcConfigResponse.class).getJwksUri());
+        Assertions.assertEquals("https://192.168.49.2:8443/openid/v1/jwks", mapper.readValue(json, OidcConfigResponse.class).getJwksUri());
     }
 }
