@@ -28,7 +28,7 @@ class KubernetesTokenVerifierTest {
         jwtUtils = new TestJwtUtils();
 
         when(restClient.getOidcConfiguration(jwtUtils.getJwtIssuer())).thenReturn(jwtUtils.getJwksEndpoint());
-        when(restClient.getJwks(jwtUtils.getJwksEndpoint())).thenReturn(jwtUtils.getJwks());
+        when(restClient.getJwks(jwtUtils.getJwksEndpoint())).then(mock -> jwtUtils.getJwks());
 
         verifier = new KubernetesTokenVerifier(restClient, jwtUtils.getDbaasJwtAudience(), () -> jwtUtils.getDefaultClaimsJwt("test-namespace"), KubernetesTokenVerifier.JWKS_VALID_INTERVAL_DEFAULT);
     }
@@ -93,7 +93,7 @@ class KubernetesTokenVerifierTest {
             validClaims.setGeneratedJwtId();
             validClaims.setIssuedAtToNow();
 
-            verifier.verify(jwtUtils.getJwt(invalidClaims, false));
+            verifier.verify(jwtUtils.getJwt(invalidClaims, true));
         });
     }
 }

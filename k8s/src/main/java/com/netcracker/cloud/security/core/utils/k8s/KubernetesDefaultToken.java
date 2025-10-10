@@ -23,7 +23,7 @@ public class KubernetesDefaultToken {
 
     private static final AtomicReference<Try<String>> token = new AtomicReference<>();
 
-    public static Path getStorageRoot() {
+    private static Path getStorageRoot() {
         return Optional.ofNullable(System.getProperty(SERVICE_ACCOUNT_DIR_PROP))
                 .map(Paths::get)
                 .orElse(SERVICE_ACCOUNT_DIR_DEFAULT);
