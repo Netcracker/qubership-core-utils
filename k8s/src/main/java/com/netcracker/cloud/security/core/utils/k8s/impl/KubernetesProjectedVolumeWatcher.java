@@ -17,8 +17,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import static java.time.temporal.ChronoUnit.NANOS;
-
 @Slf4j
 public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
     public static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(1);
@@ -43,10 +41,10 @@ public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
         log.info("Register {} in watch service", storageRoot);
         this.storageRoot.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
 
-        log.info("Start watcher for: {}", storageRoot);
+        log.info("Start watcher for: {}, with initialDelay {} and period {}", storageRoot, interval.get(ChronoUnit.NANOS), interval.get(ChronoUnit.NANOS));
         this.scheduledEventsPollTask = scheduler.scheduleAtFixedRate(this::processFilesystemEvents,
                 interval.get(ChronoUnit.NANOS),
-                interval.get(NANOS),
+                interval.get(ChronoUnit.NANOS),
                 TimeUnit.NANOSECONDS);
 
         this.cacheUpdate.accept(storageRoot);
