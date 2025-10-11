@@ -41,7 +41,9 @@ public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
         log.info("Register {} in watch service", storageRoot);
         this.storageRoot.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
 
-        log.info("Start watcher for: {}, with initialDelay {} and period {}", storageRoot, interval.get(ChronoUnit.NANOS), interval.get(ChronoUnit.NANOS));
+        log.info("Start watcher for: {}, with interval {} : initialDelay {} and period {}", storageRoot, interval, interval.get(ChronoUnit.NANOS), interval.get(ChronoUnit.NANOS));
+        log.debug("Default polling interval: {}", interval);
+        log.debug("Polling interval prop: {}", System.getProperty(WatchingTokenSource.POLLING_INTERVAL_PROP));
         this.scheduledEventsPollTask = scheduler.scheduleAtFixedRate(this::processFilesystemEvents,
                 interval.get(ChronoUnit.NANOS),
                 interval.get(ChronoUnit.NANOS),
