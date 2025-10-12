@@ -62,7 +62,7 @@ public class KubernetesOidcRestClient {
 
         log.debug("Perform request: GET {}", url);
         var request = HttpRequest.newBuilder()
-                .setHeader("Authorization", tokenSupplier.get())
+                .setHeader("Authorization", "Bearer %s".formatted(tokenSupplier.get()))
                 .uri(uri)
                 .GET()
                 .build();
