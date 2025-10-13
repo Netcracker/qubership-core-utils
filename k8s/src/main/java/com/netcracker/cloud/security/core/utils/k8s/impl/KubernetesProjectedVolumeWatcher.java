@@ -10,7 +10,6 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -84,6 +83,6 @@ public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
     public void close() {
         log.info("Watcher closed for: {}", storageRoot);
         scheduledEventsPollTask.cancel(false);
-        watchService.close();;
+        watchService.close();
     }
 }
