@@ -9,6 +9,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
 
+    <artifactId>k8s-utils</artifactId>
+
     <packaging>jar</packaging>
 
     <properties>
@@ -93,5 +95,4 @@
             </plugin>
         </plugins>
     </build>
-    <artifactId>k8s-utils</artifactId>
 </project>
