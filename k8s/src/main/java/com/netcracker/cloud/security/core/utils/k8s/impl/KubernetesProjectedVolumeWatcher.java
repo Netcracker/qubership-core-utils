@@ -10,15 +10,16 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.time.Duration;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 
 @Slf4j
 public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
-    public static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(1);
+    public static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(1, runnable -> {
+        Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+        thread.setDaemon(true);
+        return thread;
+    });
 
     // this is link to actual data container. Handle this link update event to update cache
     private static final String UPDATE_MARKER = "..data";
