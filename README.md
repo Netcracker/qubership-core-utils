@@ -16,16 +16,15 @@
 
 ## Packages
 
-|Package|Description|Documentation|
-|---|---|---|
-|tls-utils|TlS configuration and authentication utilities|[Readme](tls/README.md)|
-|k8s-utils|Utilities to provide Kubernetes projected volume tokens and verify them|[Readme](k8s/README.md)|
+| Package   | Description                                                             | Documentation           |
+|-----------|-------------------------------------------------------------------------|-------------------------|
+| tls-utils | TlS configuration and authentication utilities                          | [Readme](tls/README.md) |
+| k8s-utils | Utilities to provide Kubernetes projected volume tokens and verify them | [Readme](k8s/README.md) |
 
 # Documentation
 
 - [Contributing Guide](CONTRIBUTING.md)
 - [Code of Conduct](CODE-OF-CONDUCT.md)
-  
 - [Security Policy](SECURITY.md)
 
 # License

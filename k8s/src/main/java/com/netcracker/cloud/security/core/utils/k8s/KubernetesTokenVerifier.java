@@ -35,10 +35,10 @@ public class KubernetesTokenVerifier {
     private final Duration jwksValidInterval;
     private final AtomicReference<Instant> jwksExpiration = new AtomicReference<>(Instant.MIN);
 
-    public KubernetesTokenVerifier(String jwtAudience) {
+    public KubernetesTokenVerifier(String audience) {
         this(
                 new KubernetesOidcRestClient(KubernetesServiceAccountToken::getToken),
-                jwtAudience,
+                audience,
                 KubernetesServiceAccountToken::getToken,
                 Optional.ofNullable(System.getProperty(JWKS_VALID_INTERVAL_PROP))
                         .map(Duration::parse)
@@ -46,9 +46,10 @@ public class KubernetesTokenVerifier {
         );
     }
 
-    KubernetesTokenVerifier(KubernetesOidcRestClient restClient, String audience, Supplier<String> oidcToken, Duration jwksValidInterval) {
+    KubernetesTokenVerifier(KubernetesOidcRestClient restClient, String audience,
+                            Supplier<String> oidcToken, Duration jwksValidInterval) {
         this.restClient = restClient;
-        String issuer = this.getIssuerFromJwt(oidcToken.get());
+        String issuer = this.getIssuerFromToken(oidcToken.get());
         this.jwtClaimsParser = new JwtConsumerBuilder()
                 .setRequireExpirationTime()
                 .setAllowedClockSkewInSeconds(30)
@@ -139,7 +140,7 @@ public class KubernetesTokenVerifier {
         return jwksCache.get().get(keyId);
     }
 
-    private String getIssuerFromJwt(String token) {
+    private String getIssuerFromToken(String token) {
         try {
             JwtConsumer jwtConsumer = new JwtConsumerBuilder()
                     .setSkipAllValidators()
