@@ -17,6 +17,7 @@ import java.util.function.Consumer;
 public class KubernetesProjectedVolumeWatcher implements AutoCloseable {
     public static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(1, runnable -> {
         Thread thread = Executors.defaultThreadFactory().newThread(runnable);
+        thread.setName("KubernetesProjectedVolumeWatcher");
         thread.setDaemon(true);
         return thread;
     });
