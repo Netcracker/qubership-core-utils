@@ -13,9 +13,6 @@
 
     <properties>
         <mockito.version>5.17.0</mockito.version>
-        <sonar.coverage.exclusions>
-            **/TlsInitializationException.java
-        </sonar.coverage.exclusions>
     </properties>
 
     <dependencies>
@@ -29,6 +26,7 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>24.1.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -50,5 +48,4 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
 </project>
