@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 @Slf4j
@@ -12,7 +13,7 @@ public class CacheRefresher<T> {
     private final Function<T, T> updater;
     private final NanoTimeSupplier timeSupplier;
     private final AtomicLong expired = new AtomicLong(0); // force reread cache on first run
-    private volatile T cache;
+    private final AtomicReference<T> cache = new AtomicReference<>();
 
     public CacheRefresher(Duration refreshInterval, Function<T, T> updater) {
         this(refreshInterval, updater, System::nanoTime);
@@ -31,13 +32,13 @@ public class CacheRefresher<T> {
 
             synchronized (expired) {
                 if (expired.get() < now) {
-                    cache = updater.apply(cache);
-                    expired.set(now +  refreshInterval);
+                    cache.set(updater.apply(cache.get()));
+                    expired.set(now + refreshInterval);
                 }
             }
         }
 
-        return cache;
+        return cache.get();
     }
 
     // introduce interface that supplies java primitive to avoid allocating Long wrapper object on heap
