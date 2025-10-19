@@ -1,6 +1,6 @@
 package com.netcracker.cloud.security.core.utils.k8s.impl;
 
-import com.netcracker.cloud.security.core.utils.k8s.KubernetesServiceAccountToken;
+import lombok.extern.slf4j.Slf4j;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
 import org.junit.jupiter.api.Test;
@@ -12,15 +12,15 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.Map;
 
-import static com.netcracker.cloud.security.core.utils.k8s.KubernetesServiceAccountToken.SERVICE_ACCOUNT_DIR_PROP;
-import static com.netcracker.cloud.security.core.utils.k8s.impl.WatchingTokenSource.POLLING_INTERVAL_PROP;
-import static com.netcracker.cloud.security.core.utils.k8s.impl.WatchingTokenSource.TOKENS_DIR_PROP;
+import static com.netcracker.cloud.security.core.utils.k8s.SystemPropertiesTestHelper.withProperty;
+import static com.netcracker.cloud.security.core.utils.k8s.impl.CachingTokenSource.POLLING_INTERVAL_PROP;
+import static com.netcracker.cloud.security.core.utils.k8s.impl.CachingTokenSource.TOKENS_DIR_PROP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class WatchingTokenSourceTest {
+@Slf4j
+class CachingTokenSourceTest {
 
     private final RetryPolicy<?> retryPolicy = new RetryPolicy<>()
             .withDelay(Duration.ofMillis(5))
@@ -31,7 +31,7 @@ class WatchingTokenSourceTest {
         var interval = Duration.ofMillis(10);
         updateToken(storageRoot, "dbaas", "token1");
 
-        try (var ts = new WatchingTokenSource(storageRoot, interval, KubernetesProjectedVolumeWatcher.EXECUTOR)) {
+        try (var ts = new CachingTokenSource(storageRoot, interval)) {
             assertEquals("token1", ts.getToken("dbaas"));
 
             // test update
@@ -42,21 +42,21 @@ class WatchingTokenSourceTest {
 
     @Test
     void testDefaultConstructor(@TempDir Path storageRoot) throws Exception {
-        var props = new HashMap<String, String>();
-        props.put(TOKENS_DIR_PROP, storageRoot.toString());
-        props.put(SERVICE_ACCOUNT_DIR_PROP, storageRoot.toString());
-        props.put(POLLING_INTERVAL_PROP, "PT0.010S");
+        var props = Map.of(
+                TOKENS_DIR_PROP, storageRoot.toString(),
+                POLLING_INTERVAL_PROP, "PT0.010S"
+        );
         withProperty(props, () -> {
                     updateToken(storageRoot, "dbaas", "token1");
 
-                    try (var ts = new WatchingTokenSource()) {
+                    try (var ts = new CachingTokenSource()) {
                         assertEquals("token1", ts.getToken("dbaas"));
-                        Failsafe.with(retryPolicy).run(() -> assertEquals("token1", KubernetesServiceAccountToken.getToken()));
 
                         // test update
+                        log.info("Update token, wait some time, and recheck token");
                         updateToken(storageRoot, "dbaas", "token2");
+                        Thread.sleep(100);
                         Failsafe.with(retryPolicy).run(() -> assertEquals("token2", ts.getToken("dbaas")));
-                        Failsafe.with(retryPolicy).run(() -> assertEquals("token2", KubernetesServiceAccountToken.getToken()));
                     }
                 }
         );
@@ -79,8 +79,8 @@ class WatchingTokenSourceTest {
      * @throws IOException if file operations fail
      */
     private void updateToken(Path storageRoot, String audience, String token) throws Exception {
-        var timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss"));
-        var timestampDir = storageRoot.resolve(".." + timestamp + "." + System.nanoTime());
+        var timestamp = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss.SSSSSSSSS").format(LocalDateTime.now());
+        var timestampDir = storageRoot.resolve(".." + timestamp);
 
         // Create the audience subdirectory
         var audienceDir = timestampDir.resolve(audience);
@@ -103,29 +103,5 @@ class WatchingTokenSourceTest {
         if (!Files.exists(audienceLink)) {
             Files.createSymbolicLink(audienceLink, dataLink.resolve(audience));
         }
-    }
-
-    void withProperty(Map<String, String> properties, OmnivoreRunnable runnable) throws Exception {
-        var previousValues = new HashMap<String, String>();
-        properties.forEach((name, value) -> {
-            previousValues.put(name, System.getProperty(name));
-            System.setProperty(name, value);
-        });
-        try {
-            runnable.run();
-        } finally {
-            previousValues.forEach((name, previousValue) -> {
-                if (previousValue != null) {
-                    System.setProperty(name, previousValue);
-                } else {
-                    System.clearProperty(name);
-                }
-            });
-        }
-    }
-
-    @FunctionalInterface
-    interface OmnivoreRunnable {
-        void run() throws Exception;
     }
 }
