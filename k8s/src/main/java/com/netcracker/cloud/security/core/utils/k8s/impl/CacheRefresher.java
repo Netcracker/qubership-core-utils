@@ -12,7 +12,7 @@ public class CacheRefresher<T> {
     private final long refreshInterval;
     private final Function<T, T> updater;
     private final NanoTimeSupplier timeSupplier;
-    private final AtomicLong expired = new AtomicLong(0); // force reread cache on first run
+    private final AtomicLong expirationTime = new AtomicLong(0); // force reread cache on first run
     private final AtomicReference<T> cache = new AtomicReference<>();
 
     public CacheRefresher(Duration refreshInterval, Function<T, T> updater) {
@@ -27,13 +27,13 @@ public class CacheRefresher<T> {
 
     public T getCache() {
         var now = timeSupplier.get();
-        if (expired.get() < now) {
+        if (expirationTime.get() < now) {
             log.debug("Update cache");
 
-            synchronized (expired) {
-                if (expired.get() < now) {
+            synchronized (expirationTime) {
+                if (expirationTime.get() < now) {
                     cache.set(updater.apply(cache.get()));
-                    expired.set(now + refreshInterval);
+                    expirationTime.set(now + refreshInterval);
                 }
             }
         }
