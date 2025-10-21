@@ -1,1 +1,1 @@
-com.netcracker.cloud.security.core.utils.k8s.impl.WatchingTokenSource
+com.netcracker.cloud.security.core.utils.k8s.impl.CachingTokenSource
