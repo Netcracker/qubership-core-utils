@@ -21,7 +21,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.40</version>  <!-- Check for the latest version -->
+            <version>1.18.42</version>  <!-- Check for the latest version -->
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -78,7 +78,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.5.19</version>
+            <version>1.5.20</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
