@@ -7,14 +7,12 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 import static com.netcracker.cloud.security.core.utils.k8s.KubernetesServiceAccountToken.SERVICE_ACCOUNT_DIR_PROP;
 import static com.netcracker.cloud.security.core.utils.k8s.SystemPropertiesTestHelper.withProperty;
 import static com.netcracker.cloud.security.core.utils.k8s.impl.CachingTokenSource.POLLING_INTERVAL_PROP;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class KubernetesServiceAccountTokenTest {
     @Test
@@ -36,23 +34,23 @@ class KubernetesServiceAccountTokenTest {
 
     @SneakyThrows
     private static void createKubernetesSecretsStructure(Path serviceAccountDir, String tokenValue) {
-        // Timestamped subdirectory, like "..2025_10_19_18_14_19.2820761135"
-        String timestamp = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss.SSSSSSSSS")
-                .format(LocalDateTime.now());
-        Path versionedDir = serviceAccountDir.resolve(".." + timestamp);
-
-        // Create directory hierarchy
-        Files.createDirectories(versionedDir);
+        Path versionedDir = FilesUtils.createTimestampDir(serviceAccountDir);
 
         // Create example files
         Files.writeString(versionedDir.resolve("token"), tokenValue);
 
-        // Create symlink "..data" -> "..<timestamp>"
+        // Create symlinks where supported; fallback to plain file on Windows without privileges.
         Path dataLink = serviceAccountDir.resolve("..data");
         Files.deleteIfExists(dataLink);
-        Files.createSymbolicLink(dataLink, Paths.get(".." + timestamp).getFileName());
+        boolean symlinkCreated = FilesUtils.tryCreateSymbolicLink(dataLink, versionedDir.getFileName());
 
-        Files.deleteIfExists(serviceAccountDir.resolve("token"));
-        Files.createSymbolicLink(serviceAccountDir.resolve("token"), Paths.get("..data/token"));
+        Path tokenLink = serviceAccountDir.resolve("token");
+        Files.deleteIfExists(tokenLink);
+        if (symlinkCreated && FilesUtils.tryCreateSymbolicLink(tokenLink, Paths.get("..data/token"))) {
+            return;
+        }
+
+        // Fallback: write directly to token file if symlinks are not available.
+        Files.writeString(tokenLink, tokenValue);
     }
 }
