@@ -1,5 +1,6 @@
 package com.netcracker.cloud.security.core.utils.k8s.impl;
 
+import com.netcracker.cloud.security.core.utils.k8s.FilesUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.jodah.failsafe.Failsafe;
 import net.jodah.failsafe.RetryPolicy;
@@ -10,10 +11,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
+import static com.netcracker.cloud.security.core.utils.k8s.FilesUtils.tryCreateSymbolicLink;
 import static com.netcracker.cloud.security.core.utils.k8s.SystemPropertiesTestHelper.withProperty;
 import static com.netcracker.cloud.security.core.utils.k8s.impl.CachingTokenSource.POLLING_INTERVAL_PROP;
 import static com.netcracker.cloud.security.core.utils.k8s.impl.CachingTokenSource.TOKENS_DIR_PROP;
@@ -79,8 +79,7 @@ class CachingTokenSourceTest {
      * @throws IOException if file operations fail
      */
     private void updateToken(Path storageRoot, String audience, String token) throws Exception {
-        var timestamp = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss.SSSSSSSSS").format(LocalDateTime.now());
-        var timestampDir = storageRoot.resolve(".." + timestamp);
+        Path timestampDir = FilesUtils.createTimestampDir(storageRoot);
 
         // Create the audience subdirectory
         var audienceDir = timestampDir.resolve(audience);
@@ -92,16 +91,21 @@ class CachingTokenSourceTest {
         // Create the default service account token file with sample token content
         Files.writeString(storageRoot.resolve("token"), token);
 
-        // Create ..data symlink pointing to timestamp directory
+        // Create ..data symlink pointing to timestamp directory (fallback on Windows if not permitted)
         var dataLink = storageRoot.resolve("..data");
         Files.deleteIfExists(dataLink);
-        Files.createSymbolicLink(dataLink, timestampDir.getFileName());
+        boolean dataSymlinkCreated = tryCreateSymbolicLink(dataLink, timestampDir.getFileName());
 
         // Create audience symlink pointing to ..data/audience
         var audienceLink = storageRoot.resolve(audience);
-
-        if (!Files.exists(audienceLink)) {
-            Files.createSymbolicLink(audienceLink, dataLink.resolve(audience));
+        if (dataSymlinkCreated && !Files.exists(audienceLink)) {
+            if (tryCreateSymbolicLink(audienceLink, dataLink.resolve(audience))) {
+                return;
+            }
         }
+
+        // Fallback: create real directory under storageRoot/audience with token file.
+        Files.createDirectories(audienceLink);
+        Files.writeString(audienceLink.resolve("token"), token);
     }
 }

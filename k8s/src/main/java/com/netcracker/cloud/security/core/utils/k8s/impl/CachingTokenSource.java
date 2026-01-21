@@ -27,7 +27,8 @@ public class CachingTokenSource implements TokenSource {
     // And taking into account that minimal update interval is 10 min, I choose 1 min
     public static final Duration POLLING_INTERVAL_DEFAULT = Duration.ofMinutes(1);
 
-    private static final Pattern TOKEN_PATH_MATCHER = Pattern.compile("([^./]+)/token");
+    //match separator char for both linux and windows platforms
+    private static final Pattern TOKEN_PATH_MATCHER = Pattern.compile("([^./\\\\]+)[/\\\\]token");
 
     private final CacheRefresher<HashMap<String, Try<String>>> cacheRefresher;
 
