@@ -11,6 +11,6 @@ public class M2MManagerLocator {
                 .stream()
                 .map(ServiceLoader.Provider::get)
                 .max(Comparator.comparingInt(M2MManager::priority))
-                .orElseThrow(()->new Error("Service loader failed to load M2MManager service: " + loader.getClass().getName()));
+                .orElseThrow(()->new Error("Service loader failed to load M2MManager class: " + loader.getClass().getName()));
     }
 }
