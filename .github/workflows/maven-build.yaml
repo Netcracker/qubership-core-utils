@@ -18,7 +18,7 @@ on:
 jobs:
   build-java-lib:
     name: Build java lib
-    uses: Netcracker/qubership-core-infra/.github/workflows/generic-build-maven-lib.yaml@v1.3.1
+    uses: Netcracker/qubership-core-infra/.github/workflows/generic-build-maven-lib.yaml@v1.3.2
     with:
       actor: ${{ github.actor }}
       sonar-project-key: ${{ vars.SONAR_PROJECT_KEY }}
