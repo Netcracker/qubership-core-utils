@@ -18,7 +18,7 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>17</java.version>
+        <java.version>21</java.version>
         <surefire-plugin.version>3.5.4</surefire-plugin.version>
         <jacoco.plugin.version>0.8.14</jacoco.plugin.version>
     </properties>
