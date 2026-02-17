@@ -19,3 +19,4 @@ jobs:
       maven-command: 'deploy'
       upload-artifact: true
       sonar-project-key: ${{ vars.SONAR_PROJECT_KEY }}
+
