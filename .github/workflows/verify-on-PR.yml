@@ -1,22 +1,20 @@
-name: Deploy on push
+name: Verify on PR
 
 run-name: >
-  Deploy —
-  push (${{ github.ref_name }}) —
-  [${{ github.event.head_commit.message }}]
+  Verify —
+  PR (${{ github.head_ref }}) —
+  [${{ github.event.pull_request.title }}]
 
 on:
-  push:
-    branches:
-      - main
-      - feat/monorepo-workflows
+  pull_request:
+    types: [ opened, synchronize, reopened ]
 
 jobs:
   deploy-on-push:
-    name: Maven build and deploy
+    name: Maven verify
     uses: Netcracker/qubership-core-infra/.github/workflows/generic-maven-build.yaml@feat/monorepo-workflows
     with:
-      maven-command: 'deploy'
+      maven-command: 'verify'
       upload-artifact: true
       sonar-project-key: ${{ vars.SONAR_PROJECT_KEY }}
     secrets: inherit
