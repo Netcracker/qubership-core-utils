@@ -44,4 +44,10 @@ public class KubernetesAudienceToken {
         int priority;
         ServiceLoader.Provider<TokenSource> provider;
     }
+
+    public void newShinyMethod() {
+        System.out.println("1");
+        System.out.println("2");
+        System.out.println("3");
+    }
 }
