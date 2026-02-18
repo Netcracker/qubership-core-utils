@@ -19,3 +19,4 @@ jobs:
       sonar-project-key: ${{ vars.SONAR_PROJECT_KEY }}
     secrets: inherit
 
+
