@@ -20,3 +20,4 @@ jobs:
       upload-artifact: true
       sonar-project-key: ${{ vars.SONAR_PROJECT_KEY }}
     secrets: inherit
+
