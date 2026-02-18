@@ -2,7 +2,7 @@ name: Deploy on push
 
 run-name: >
   Deploy —
-  ${{ github.event_name == 'workflow_dispatch' && 'manual' || 'push' }} (${{ github.ref_name }})
+  ${{ github.event_name == 'workflow_dispatch' && 'manual' || 'push' }}
   ${{ github.event_name == 'push' && format('[{0}]', github.event.head_commit.message) || '' }}
 
 on:
