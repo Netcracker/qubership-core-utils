@@ -2,14 +2,15 @@ name: Deploy on push
 
 run-name: >
   Deploy —
-  push (${{ github.ref_name }}) —
-  [${{ github.event.head_commit.message }}]
+  ${{ github.event_name == 'workflow_dispatch' && 'manual' || 'push' }} (${{ github.ref_name }})
+  ${{ github.event_name == 'push' && format('[{0}]', github.event.head_commit.message) || '' }}
 
 on:
   push:
     branches:
       - main
       - feat/monorepo-workflows
+  workflow_dispatch:
 
 jobs:
   deploy-on-push:
@@ -19,5 +20,6 @@ jobs:
       maven-command: 'deploy'
       upload-artifact: true
       sonar-project-key: ${{ vars.SONAR_PROJECT_KEY }}
+      ref: ${{ github.ref }}
     secrets: inherit
 
