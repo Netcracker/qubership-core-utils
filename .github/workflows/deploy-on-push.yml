@@ -1,0 +1,23 @@
+name: Deploy on push
+
+run-name: >
+  Deploy —
+  push (${{ github.ref_name }}) —
+  [${{ github.event.head_commit.message }}]
+
+on:
+  push:
+    branches:
+      - main
+      - feat/monorepo-workflows
+
+jobs:
+  deploy-on-push:
+    name: Maven build and deploy
+    uses: Netcracker/qubership-core-infra/.github/workflows/generic-maven-build.yaml@feat/monorepo-workflows
+    with:
+      maven-command: 'deploy'
+      upload-artifact: true
+      sonar-project-key: ${{ vars.SONAR_PROJECT_KEY }}
+    secrets: inherit
+
