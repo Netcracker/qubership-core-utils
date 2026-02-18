@@ -12,7 +12,7 @@ on:
 jobs:
   deploy-on-push:
     name: Maven verify
-    uses: Netcracker/qubership-core-infra/.github/workflows/generic-maven-build.yaml@feat/monorepo-workflows
+    uses: Netcracker/qubership-core-infra/.github/workflows/generic-maven-build.yaml@feat/new-generic-workflows
     with:
       maven-command: 'verify'
       upload-artifact: true
