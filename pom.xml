@@ -40,17 +40,32 @@
         <repository>
             <id>github</id>
             <url>https://maven.pkg.github.com/netcracker/*</url>
-            <snapshots />
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </repository>
     </repositories>
 
-    <distributionManagement>
-            <repository>
-                <id>github</id>
-                <name>GitHub OWNER Apache Maven Packages</name>
-                <url>https://maven.pkg.github.com/netcracker/qubership-core-utils</url>
-            </repository>
-    </distributionManagement>
+    <profiles>
+        <!-- GitHub packages -->
+        <!-- mvn deploy -P github -->
+        <profile>
+            <id>github</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <distributionManagement>
+                <repository>
+                    <id>github</id>
+                    <name>GitHub Packages</name>
+                    <url>https://maven.pkg.github.com/Netcracker/qubership-core-utils</url>
+                </repository>
+            </distributionManagement>
+        </profile>
+    </profiles>
 
     <build>
         <plugins>
