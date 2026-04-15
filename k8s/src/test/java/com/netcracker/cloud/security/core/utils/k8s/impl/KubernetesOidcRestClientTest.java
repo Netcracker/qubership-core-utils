@@ -38,10 +38,14 @@ class KubernetesOidcRestClientTest {
             MockResponse response = new MockResponse();
             response.setBody(mockOidcConfig);
             server.enqueue(response);
+            server.enqueue(response);
             server.start();
 
             var baseUrl = server.url("").toString();
             var actual = restClient.getOidcConfiguration(baseUrl);
+            Assertions.assertEquals("https://192.168.49.2:8443/openid/v1/jwks", actual);
+
+            actual = restClient.getOidcConfiguration(baseUrl+"/");
             Assertions.assertEquals("https://192.168.49.2:8443/openid/v1/jwks", actual);
         }
     }

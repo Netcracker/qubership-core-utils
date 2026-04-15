@@ -38,7 +38,7 @@ public class KubernetesOidcRestClient {
     }
 
     public String getOidcConfiguration(String issuer) {
-        var url = issuer + "/.well-known/openid-configuration";
+        var url = StringUtils.stripEnd(issuer, "/") + "/.well-known/openid-configuration";
         log.info("Request OIDC configuration for {}", url);
         try {
             return objectMapper.readValue(doRequest(url), OidcConfigResponse.class).getJwksUri();
