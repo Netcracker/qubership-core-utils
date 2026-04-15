@@ -27,7 +27,7 @@ class KubernetesOidcRestClientTest {
 
 
     @Test
-    void getOidcConfiguration() throws IOException {
+    void getOidcConfiguration() throws Exception {
         var mockOidcConfig = "{\"issuer\":\"https://kubernetes.default.svc.cluster.local\","
                 + "\"jwks_uri\":\"https://192.168.49.2:8443/openid/v1/jwks\","
                 + "\"response_types_supported\":[\"id_token\"],"
@@ -38,11 +38,17 @@ class KubernetesOidcRestClientTest {
             MockResponse response = new MockResponse();
             response.setBody(mockOidcConfig);
             server.enqueue(response);
+            server.enqueue(response);
             server.start();
 
             var baseUrl = server.url("").toString();
             var actual = restClient.getOidcConfiguration(baseUrl);
             Assertions.assertEquals("https://192.168.49.2:8443/openid/v1/jwks", actual);
+            Assertions.assertEquals("/.well-known/openid-configuration", server.takeRequest().getPath());
+
+            actual = restClient.getOidcConfiguration(baseUrl+"/");
+            Assertions.assertEquals("https://192.168.49.2:8443/openid/v1/jwks", actual);
+            Assertions.assertEquals("/.well-known/openid-configuration", server.takeRequest().getPath());
         }
     }
 
