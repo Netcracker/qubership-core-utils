@@ -1,2 +1,0 @@
-com.netcracker.cloud.security.core.utils.k8s.TestTokenSourceLowPriorityImpl
-com.netcracker.cloud.security.core.utils.k8s.TestTokenSourceHighPriorityImpl
